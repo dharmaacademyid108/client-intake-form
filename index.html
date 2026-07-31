@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Training &amp; Nutrition Intake</title>
+<style>
+  :root{
+    --ink:#12312a;
+    --ink-soft:#3d5a52;
+    --paper:#f6f7f5;
+    --card:#ffffff;
+    --line:#dcded8;
+    --accent:#12312a;
+    --accent-wash:#e6ede9;
+    --flag:#8a3d1b;
+    --flag-wash:#fbf0e8;
+    --stop:#8f2727;
+    --stop-wash:#fbeced;
+    --muted:#6d7772;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--paper); color:var(--ink);
+    margin:0; padding:0 16px 120px; line-height:1.55;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:700px;margin:0 auto;}
+
+  header.top{padding:34px 0 8px;}
+  h1{font-size:1.45rem;line-height:1.25;margin:0 0 6px;letter-spacing:-0.01em;}
+  .sub{color:var(--muted);margin:0 0 4px;font-size:0.94rem;}
+
+  /* signature element: a quiet progress rail that tells you how much is left */
+  .rail{
+    position:sticky;top:0;z-index:20;
+    background:var(--paper);
+    padding:10px 0 12px;
+    margin-bottom:18px;
+    border-bottom:1px solid var(--line);
+  }
+  .rail-track{height:3px;background:var(--line);border-radius:2px;overflow:hidden;}
+  .rail-fill{height:100%;width:0;background:var(--ink);transition:width .35s ease;}
+  .rail-label{
+    display:flex;justify-content:space-between;
+    font-size:0.75rem;color:var(--muted);margin-top:7px;
+    font-variant-numeric:tabular-nums;
+  }
+
+  fieldset{
+    border:1px solid var(--line); border-radius:12px;
+    padding:20px 20px 8px; margin:0 0 18px; background:var(--card);
+  }
+  legend{
+    font-weight:650; font-size:0.82rem; letter-spacing:0.07em; text-transform:uppercase;
+    color:var(--ink); padding:0 9px; background:var(--card);
+    border:1px solid var(--line); border-radius:99px;
+  }
+  .lede{color:var(--muted);font-size:0.87rem;margin:2px 0 18px;}
+
+  .field{margin-bottom:18px;}
+  label.q{display:block;font-weight:560;margin-bottom:7px;font-size:0.95rem;}
+  .hint{color:var(--muted);font-size:0.82rem;margin:-3px 0 7px;}
+  .req::after{content:" *";color:var(--stop);font-weight:700;}
+
+  input[type=text],input[type=number],input[type=date],select,textarea{
+    width:100%; padding:10px 11px; border:1px solid var(--line); border-radius:8px;
+    font-size:16px; font-family:inherit; background:#fff; color:var(--ink);
+  }
+  input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{
+    outline:2.5px solid var(--ink); outline-offset:2px;
+  }
+  textarea{resize:vertical;min-height:62px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:560px){.row2{grid-template-columns:1fr;}}
+
+  .pills{display:flex;flex-wrap:wrap;gap:8px;}
+  .pill{
+    position:relative; border:1px solid var(--line); border-radius:99px;
+    padding:8px 15px; font-size:0.89rem; cursor:pointer; background:#fff; display:inline-block;
+  }
+  .pill input{position:absolute;opacity:0;width:1px;height:1px;margin:0;}
+  .pill.on{background:var(--accent-wash);border-color:var(--ink);font-weight:640;}
+  .pill:has(input:focus-visible){outline:2.5px solid var(--ink);outline-offset:2px;}
+  .pill.flag.on{background:var(--flag-wash);border-color:var(--flag);color:var(--flag);}
+  .stack .pill{display:block;width:100%;border-radius:9px;padding:11px 14px;}
+
+  .callout{
+    border-left:3px solid var(--flag); background:var(--flag-wash);
+    padding:13px 15px; border-radius:0 9px 9px 0; font-size:0.88rem; margin-bottom:18px;
+  }
+  .callout.stop{border-color:var(--stop);background:var(--stop-wash);}
+  .callout strong{display:block;margin-bottom:3px;}
+  .hidden{display:none;}
+
+  .consent{
+    border:1px solid var(--line);border-radius:12px;background:var(--card);
+    padding:18px 20px;margin-bottom:18px;font-size:0.88rem;
+  }
+  .consent p{margin:0 0 10px;color:var(--ink-soft);}
+  .agree{display:flex;gap:10px;align-items:flex-start;font-weight:560;color:var(--ink);}
+  .agree input{margin-top:4px;width:18px;height:18px;flex:none;}
+
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+  button{
+    font-family:inherit;font-size:0.97rem;font-weight:640;border-radius:9px;
+    padding:13px 20px;cursor:pointer;border:1px solid var(--ink);
+  }
+  .primary{background:var(--ink);color:#fff;flex:1 1 220px;}
+  .ghost{background:#fff;color:var(--ink);}
+  .saved{font-size:0.78rem;color:var(--muted);margin-top:10px;min-height:1em;}
+
+  #output{display:none;margin-top:26px;}
+  #summaryBox{
+    background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;
+    white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:0.8rem;max-height:380px;overflow:auto;
+  }
+  .err{color:var(--stop);font-size:0.85rem;margin-top:8px;}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <h1>Training &amp; nutrition intake</h1>
+  <p class="sub">About 10 minutes. Your answers save automatically on this device, so you can stop and come back. At the end you'll get a summary to send to your coach.</p>
+</header>
+
+<div class="rail">
+  <div class="rail-track"><div class="rail-fill" id="railFill"></div></div>
+  <div class="rail-label"><span id="railText">Not started</span><span id="railPct">0%</span></div>
+</div>
+
+<div class="consent">
+  <p><strong>Before you start.</strong> I'm a fitness and nutrition coach, not a doctor. Nothing here diagnoses or treats a medical condition. Some answers below may mean I ask you to get clearance from a doctor or physiotherapist before I write your program — that's normal, and it's how I keep the program safe.</p>
+  <p>Your answers are used only to build and adjust your program. Send the summary through whichever channel you prefer; if you'd rather not put medical details in writing, leave those fields blank and tell me you'd like to discuss them by call.</p>
+  <label class="agree"><input type="checkbox" id="consent" required> I understand, and my answers are accurate to the best of my knowledge.</label>
+</div>
+
+<form id="intakeForm" novalidate>
+
+<!-- 1 -->
+<fieldset>
+  <legend>1 — About you</legend>
+  <div class="field"><label class="q req">Full name</label><input type="text" name="name" maxlength="80" required></div>
+  <div class="row2">
+    <div class="field"><label class="q req">Age</label><input type="number" name="age" min="18" max="95" required></div>
+    <div class="field"><label class="q req">Sex at birth</label>
+      <div class="hint">Used for calorie, recovery and health-screening calculations.</div>
+      <select name="sex" id="sexSel" required><option value="">Select</option><option>Male</option><option>Female</option><option>Prefer to discuss</option></select>
+    </div>
+  </div>
+  <div class="row2">
+    <div class="field"><label class="q req">Height</label>
+      <div class="hint">In centimetres, e.g. 172</div>
+      <input type="number" name="height" min="120" max="230" required>
+    </div>
+    <div class="field"><label class="q req">Weight</label>
+      <div class="hint">In kilograms, e.g. 84.5</div>
+      <input type="number" step="0.1" name="weight" min="30" max="250" required>
+    </div>
+  </div>
+  <div class="field"><label class="q">Best way to reach you</label><input type="text" name="contact" maxlength="80" placeholder="WhatsApp number or email"></div>
+  <div class="field"><label class="q">What does your work involve physically?</label>
+    <select name="occupation"><option value="">Select</option>
+      <option>Mostly sitting</option><option>Mix of sitting and moving</option>
+      <option>On my feet most of the day</option><option>Physically demanding / heavy lifting</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">Roughly how many steps a day?</label>
+    <div class="hint">Your phone usually knows. A guess is fine.</div>
+    <select name="steps"><option value="">Not sure</option>
+      <option>Under 3,000</option><option>3,000–6,000</option><option>6,000–10,000</option><option>Over 10,000</option>
+    </select>
+  </div>
+</fieldset>
+
+<!-- 2 -->
+<fieldset>
+  <legend>2 — Health screening</legend>
+  <p class="lede">This section decides whether I can safely program for you at all. Please don't skip it.</p>
+
+  <div class="field"><label class="q req">Have you experienced any of these? Tick everything that applies.</label>
+    <div class="pills stack" data-name="red_flags" data-flag="1">
+      <label class="pill flag"><input type="checkbox" value="Chest pain/pressure/tightness with exertion">Chest pain, pressure or tightness when you exert yourself</label>
+      <label class="pill flag"><input type="checkbox" value="Unusual breathlessness">Getting far more breathless than expected for the effort</label>
+      <label class="pill flag"><input type="checkbox" value="Dizziness/fainting/palpitations">Dizziness, fainting, or a racing/irregular heartbeat</label>
+      <label class="pill flag"><input type="checkbox" value="Pain that wakes at night">Pain that wakes you at night</label>
+      <label class="pill flag"><input type="checkbox" value="Numbness/tingling into limb">Numbness, tingling or pins-and-needles running down an arm or leg</label>
+      <label class="pill flag"><input type="checkbox" value="Weakness or joint giving way">A limb going weak, or a joint giving way underneath you</label>
+      <label class="pill flag"><input type="checkbox" value="Joint locking/catching">A joint locking, catching, or getting stuck</label>
+      <label class="pill flag"><input type="checkbox" value="Unexplained weight loss">Weight loss you can't explain</label>
+      <label class="pill flag"><input type="checkbox" value="Change in bladder/bowel control">Any change in bladder or bowel control</label>
+      <label class="pill" data-none="1"><input type="checkbox" value="None of these">None of these</label>
+    </div>
+  </div>
+
+  <div class="callout stop hidden" id="flagBox">
+    <strong>Let's talk before you start training.</strong>
+    Please still finish and send the form — but I'll want you to see a doctor or physiotherapist about what you ticked before I write anything. If you have chest pain, breathlessness or fainting during exertion, get that checked before your next workout.
+  </div>
+
+  <div class="field"><label class="q req">Any diagnosed conditions? Tick everything that applies.</label>
+    <div class="pills" data-name="conditions">
+      <label class="pill"><input type="checkbox" value="High blood pressure">High blood pressure</label>
+      <label class="pill"><input type="checkbox" value="Heart condition">Heart condition</label>
+      <label class="pill"><input type="checkbox" value="High cholesterol">High cholesterol</label>
+      <label class="pill"><input type="checkbox" value="Type 1 diabetes">Type 1 diabetes</label>
+      <label class="pill"><input type="checkbox" value="Type 2 diabetes">Type 2 diabetes</label>
+      <label class="pill"><input type="checkbox" value="Prediabetes">Prediabetes</label>
+      <label class="pill"><input type="checkbox" value="Asthma/breathing">Asthma or breathing problems</label>
+      <label class="pill"><input type="checkbox" value="Thyroid">Thyroid condition</label>
+      <label class="pill"><input type="checkbox" value="Kidney or liver">Kidney or liver condition</label>
+      <label class="pill"><input type="checkbox" value="Autoimmune/inflammatory">Autoimmune or inflammatory condition</label>
+      <label class="pill"><input type="checkbox" value="Osteoporosis/low bone density">Osteoporosis or low bone density</label>
+      <label class="pill"><input type="checkbox" value="Arthritis">Arthritis</label>
+      <label class="pill"><input type="checkbox" value="Hernia">Hernia</label>
+      <label class="pill"><input type="checkbox" value="Epilepsy/seizures">Epilepsy or seizures</label>
+      <label class="pill"><input type="checkbox" value="Mental health condition">A mental health condition</label>
+      <label class="pill" data-none="1"><input type="checkbox" value="None">None</label>
+    </div>
+  </div>
+  <div class="field"><label class="q">Anything else ongoing that I should know about?</label>
+    <textarea name="other_conditions" maxlength="600"></textarea>
+  </div>
+
+  <div class="field"><label class="q req">Medicines and supplements you take regularly</label>
+    <div class="hint">Prescriptions, anything over the counter, protein powder, vitamins, herbal products. Write "none" if none. This matters more than people expect — some medicines change how your heart rate responds to training, and some change what your body composition scan reads.</div>
+    <textarea name="meds" maxlength="800" required></textarea>
+  </div>
+</fieldset>
+
+<!-- 2b: conditional -->
+<fieldset id="femaleSection" class="hidden">
+  <legend>2b — A few more</legend>
+  <p class="lede">These change training and nutrition meaningfully. Skip anything you'd rather discuss by call.</p>
+  <div class="field"><label class="q">Are you currently pregnant, or within 12 months of giving birth?</label>
+    <select name="pregnancy"><option value="">Select</option>
+      <option>No, neither</option><option>Pregnant</option>
+      <option>Post-partum, vaginal birth</option><option>Post-partum, caesarean</option>
+      <option>Prefer to discuss</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">If post-partum — how many months, and have you been checked by a physio or doctor since?</label>
+    <input type="text" name="postpartum_detail" maxlength="160">
+  </div>
+  <div class="field"><label class="q">Menstrual cycle</label>
+    <select name="cycle"><option value="">Select</option>
+      <option>Regular</option><option>Irregular</option><option>Absent for 3+ months</option>
+      <option>On hormonal contraception</option><option>Perimenopausal</option><option>Post-menopausal</option>
+      <option>Prefer to discuss</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">Do symptoms across your cycle affect your training?</label>
+    <div class="hint">Energy, pain, sleep, cravings — anything you've noticed.</div>
+    <textarea name="cycle_notes" maxlength="400"></textarea>
+  </div>
+</fieldset>
+
+<!-- 3 -->
+<fieldset>
+  <legend>3 — Injuries and what your body won't do</legend>
+
+  <div class="field"><label class="q req">Past surgeries or significant injuries</label>
+    <div class="hint">What, when, and which side. If you know the exact diagnosis, write it — "left knee, meniscus repair, March 2023" tells me far more than "knee surgery". Write "none" if none.</div>
+    <textarea name="past_injuries" maxlength="800" required></textarea>
+  </div>
+
+  <div class="field"><label class="q req">Where does it currently hurt or feel unreliable?</label>
+    <div class="pills" data-name="pain_areas">
+      <label class="pill"><input type="checkbox" value="Neck">Neck</label>
+      <label class="pill"><input type="checkbox" value="Shoulder L">Left shoulder</label>
+      <label class="pill"><input type="checkbox" value="Shoulder R">Right shoulder</label>
+      <label class="pill"><input type="checkbox" value="Elbow/Wrist">Elbow or wrist</label>
+      <label class="pill"><input type="checkbox" value="Upper back">Upper back</label>
+      <label class="pill"><input type="checkbox" value="Lower back">Lower back</label>
+      <label class="pill"><input type="checkbox" value="Hip L">Left hip</label>
+      <label class="pill"><input type="checkbox" value="Hip R">Right hip</label>
+      <label class="pill"><input type="checkbox" value="Knee L">Left knee</label>
+      <label class="pill"><input type="checkbox" value="Knee R">Right knee</label>
+      <label class="pill"><input type="checkbox" value="Ankle/Foot">Ankle or foot</label>
+      <label class="pill" data-none="1"><input type="checkbox" value="Nothing right now">Nothing right now</label>
+    </div>
+  </div>
+
+  <div class="field" id="painDetail">
+    <label class="q">For anything you ticked — how bad at its worst, and how long has it been going on?</label>
+    <div class="hint">Pain out of 10, and roughly when it started. "Left knee 4/10 going downstairs, since about February" is perfect.</div>
+    <textarea name="pain_detail" maxlength="600"></textarea>
+  </div>
+
+  <div class="field"><label class="q req">Which of these are uncomfortable, difficult, or something you avoid?</label>
+    <div class="hint">Everyday movements, not gym exercises. Tick anything that isn't fully easy.</div>
+    <div class="pills" data-name="movement_limits">
+      <label class="pill"><input type="checkbox" value="Squatting to a low chair">Squatting down to a low chair</label>
+      <label class="pill"><input type="checkbox" value="Getting up from the floor">Getting up off the floor</label>
+      <label class="pill"><input type="checkbox" value="Kneeling">Kneeling</label>
+      <label class="pill"><input type="checkbox" value="Bending to pick something up">Bending to pick something off the floor</label>
+      <label class="pill"><input type="checkbox" value="Reaching overhead">Reaching overhead</label>
+      <label class="pill"><input type="checkbox" value="Reaching behind back">Reaching behind your back</label>
+      <label class="pill"><input type="checkbox" value="Twisting">Twisting your torso</label>
+      <label class="pill"><input type="checkbox" value="Lying flat on back">Lying flat on your back</label>
+      <label class="pill"><input type="checkbox" value="Going down stairs">Going down stairs</label>
+      <label class="pill"><input type="checkbox" value="Jumping/landing">Jumping and landing</label>
+      <label class="pill"><input type="checkbox" value="Running">Running</label>
+      <label class="pill"><input type="checkbox" value="Balancing on one leg">Balancing on one leg</label>
+      <label class="pill"><input type="checkbox" value="Carrying something heavy">Carrying something heavy</label>
+      <label class="pill" data-none="1"><input type="checkbox" value="All of these are fine">All of these are fine</label>
+    </div>
+  </div>
+
+  <div class="field"><label class="q">Anything else your body won't do that isn't on that list?</label>
+    <textarea name="movement_other" maxlength="400"></textarea>
+  </div>
+
+  <div class="field"><label class="q req">Have you been seen by a doctor or physiotherapist about any of this?</label>
+    <select name="clearance" id="clearanceSel" required><option value="">Select</option>
+      <option>Yes — cleared with no restrictions</option>
+      <option>Yes — cleared, but with specific restrictions</option>
+      <option>Yes — still in treatment or rehab</option>
+      <option>No — haven't had it looked at</option>
+      <option>Nothing to clear</option>
+    </select>
+  </div>
+  <div id="clearanceDetail" class="hidden">
+    <div class="field"><label class="q">Cleared for what exactly, and when?</label>
+      <div class="hint">"Cleared to walk and cycle" is very different from "cleared to lift and return to sport". Their words, if you have them.</div>
+      <textarea name="clearance_detail" maxlength="600"></textarea>
+    </div>
+    <div class="field"><label class="q">Are you doing rehab exercises right now? Which ones, how often?</label>
+      <div class="hint">So I build around them instead of on top of them.</div>
+      <textarea name="rehab" maxlength="500"></textarea>
+    </div>
+    <div class="callout">
+      <strong>One request.</strong> If you have a physio protocol, discharge note, or operation report, send me a photo of it with your summary. It's the single most useful thing you can give me, and it stops me guessing.
+    </div>
+  </div>
+</fieldset>
+
+<!-- 4 -->
+<fieldset>
+  <legend>4 — Goals</legend>
+  <div class="field"><label class="q req">If you could only achieve one thing in the next six months, which?</label>
+    <div class="hint">One only. You can add the rest below.</div>
+    <div class="pills stack" data-name="primary_goal" data-single="1">
+      <label class="pill"><input type="checkbox" value="Fat loss">Lose fat</label>
+      <label class="pill"><input type="checkbox" value="Muscle gain">Build muscle</label>
+      <label class="pill"><input type="checkbox" value="Strength">Get stronger</label>
+      <label class="pill"><input type="checkbox" value="Sport performance">Perform better at a sport</label>
+      <label class="pill"><input type="checkbox" value="Health/longevity">General health and longevity</label>
+      <label class="pill"><input type="checkbox" value="Return from injury">Get back to normal after an injury</label>
+      <label class="pill"><input type="checkbox" value="Stamina/conditioning">Build stamina</label>
+    </div>
+  </div>
+  <div class="field"><label class="q">Also important, but second</label>
+    <div class="pills" data-name="secondary_goals">
+      <label class="pill"><input type="checkbox" value="Fat loss">Fat loss</label>
+      <label class="pill"><input type="checkbox" value="Muscle gain">Muscle</label>
+      <label class="pill"><input type="checkbox" value="Strength">Strength</label>
+      <label class="pill"><input type="checkbox" value="Sport performance">Sport</label>
+      <label class="pill"><input type="checkbox" value="Health/longevity">Health</label>
+      <label class="pill"><input type="checkbox" value="Return from injury">Injury recovery</label>
+      <label class="pill"><input type="checkbox" value="Stamina/conditioning">Stamina</label>
+      <label class="pill"><input type="checkbox" value="Mobility">Mobility</label>
+      <label class="pill"><input type="checkbox" value="Stress/mental health">Stress and mental health</label>
+    </div>
+  </div>
+  <div class="field"><label class="q">Which sport or activity, if that's part of it?</label>
+    <input type="text" name="target_sport" maxlength="120" placeholder="e.g. running, tennis, muay thai, climbing, hiking">
+  </div>
+  <div class="field"><label class="q">Why does this matter to you right now?</label>
+    <div class="hint">Be honest rather than impressive. This is the thing I'll remind you of in week seven.</div>
+    <textarea name="goal_why" maxlength="700"></textarea>
+  </div>
+  <div class="field"><label class="q">Working towards a date?</label>
+    <select name="timeline" id="timelineSel"><option value="">Select</option>
+      <option>No deadline</option><option>About 3 months</option><option>About 6 months</option>
+      <option>About a year</option><option>A specific event</option>
+    </select>
+  </div>
+  <div class="field hidden" id="eventDetail"><label class="q">What's the event, and when?</label>
+    <input type="text" name="event_detail" maxlength="160">
+  </div>
+</fieldset>
+
+<!-- 5 -->
+<fieldset>
+  <legend>5 — Your training history</legend>
+  <div class="field"><label class="q">Over the last three months, how many days a week did you actually train?</label>
+    <div class="hint">Actually — not what you intended. Zero is a completely normal answer and it's the number I program from.</div>
+    <select name="recent_freq"><option value="">Select</option>
+      <option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">Across your whole life, how much consistent training have you done?</label>
+    <select name="experience"><option value="">Select</option>
+      <option>Never really trained</option><option>Under a year</option><option>1–3 years</option>
+      <option>3–5 years</option><option>5+ years</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">Which of these have you done regularly, or been coached on?</label>
+    <div class="pills" data-name="known_lifts">
+      <label class="pill"><input type="checkbox" value="Squat">Squat</label>
+      <label class="pill"><input type="checkbox" value="Deadlift">Deadlift</label>
+      <label class="pill"><input type="checkbox" value="Bench press">Bench press</label>
+      <label class="pill"><input type="checkbox" value="Overhead press">Overhead press</label>
+      <label class="pill"><input type="checkbox" value="Row/pull-up">Rows or pull-ups</label>
+      <label class="pill"><input type="checkbox" value="Machines only">Machines only</label>
+      <label class="pill"><input type="checkbox" value="Classes">Group classes</label>
+      <label class="pill"><input type="checkbox" value="Running/cycling">Running or cycling</label>
+      <label class="pill" data-none="1"><input type="checkbox" value="None of these">None of these</label>
+    </div>
+  </div>
+  <div class="field"><label class="q">Sport background, if any</label>
+    <input type="text" name="sport_background" maxlength="200" placeholder="e.g. recreational badminton, 3 years">
+  </div>
+  <div class="field"><label class="q">Following a program right now? Which?</label>
+    <input type="text" name="current_program" maxlength="200">
+  </div>
+  <div class="field"><label class="q">What have you tried before that stopped working — and what do you think went wrong?</label>
+    <div class="hint">The most useful question on this form. Diets, programs, gym memberships, apps.</div>
+    <textarea name="past_attempts" maxlength="800"></textarea>
+  </div>
+  <div class="field"><label class="q">What's the longest you've stayed consistent, and what made that stretch work?</label>
+    <textarea name="what_worked" maxlength="600"></textarea>
+  </div>
+</fieldset>
+
+<!-- 6 -->
+<fieldset>
+  <legend>6 — Current fitness</legend>
+  <p class="lede">No wrong answers. This sets your starting point so the first weeks feel doable.</p>
+  <div class="field"><label class="q">Can you walk for 30 minutes without stopping?</label>
+    <select name="walk30"><option value="">Select</option>
+      <option>Yes, easily</option><option>Yes, but it's an effort</option><option>Not comfortably</option><option>Not sure</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">Can you jog for 10 minutes without stopping?</label>
+    <select name="jog10"><option value="">Select</option>
+      <option>Yes, easily</option><option>Yes, but hard</option><option>No</option><option>Can't run due to injury</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">Do you get out of breath climbing two flights of stairs?</label>
+    <select name="stairs"><option value="">Select</option><option>Not at all</option><option>A little</option><option>Quite a lot</option></select>
+  </div>
+  <div class="row2">
+    <div class="field"><label class="q">Resting heart rate, if you know it</label>
+      <div class="hint">From a watch or ring. Leave blank if not.</div>
+      <input type="number" name="rhr" min="30" max="130">
+    </div>
+    <div class="field"><label class="q">Do you own a heart-rate monitor or smartwatch?</label>
+      <select name="hr_device"><option value="">Select</option><option>Yes, chest strap</option><option>Yes, watch or ring</option><option>No</option></select>
+    </div>
+  </div>
+</fieldset>
+
+<!-- 7 -->
+<fieldset>
+  <legend>7 — Recovery and life load</legend>
+  <p class="lede">This decides how much training you can absorb. Getting it wrong is the most common reason a good program stops working.</p>
+  <div class="row2">
+    <div class="field"><label class="q">Hours of sleep on a typical night</label>
+      <select name="sleep_hours"><option value="">Select</option>
+        <option>Under 5</option><option>5–6</option><option>6–7</option><option>7–8</option><option>Over 8</option>
+      </select>
+    </div>
+    <div class="field"><label class="q">Sleep quality</label>
+      <select name="sleep_quality"><option value="">Select</option>
+        <option>Good, wake up rested</option><option>Broken but manageable</option><option>Poor most nights</option>
+      </select>
+    </div>
+  </div>
+  <div class="field"><label class="q">Do you work shifts or nights?</label>
+    <select name="shift"><option value="">Select</option><option>No</option><option>Sometimes</option><option>Yes, regularly</option></select>
+  </div>
+  <div class="field"><label class="q">Current stress level, 1 to 5</label>
+    <div class="hint">1 is calm, 5 is stretched to the limit.</div>
+    <select name="stress"><option value="">Select</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>
+  </div>
+  <div class="field"><label class="q">Alcohol</label>
+    <select name="alcohol"><option value="">Select</option>
+      <option>None</option><option>1–3 drinks a week</option><option>4–7 a week</option><option>More than 7 a week</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">Caffeine per day</label>
+    <select name="caffeine"><option value="">Select</option>
+      <option>None</option><option>1–2 cups</option><option>3–4 cups</option><option>5+ cups</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">Do you smoke or vape?</label>
+    <select name="smoking"><option value="">Select</option><option>No</option><option>Occasionally</option><option>Daily</option><option>Recently quit</option></select>
+  </div>
+</fieldset>
+
+<!-- 8 -->
+<fieldset>
+  <legend>8 — Schedule and equipment</legend>
+  <div class="row2">
+    <div class="field"><label class="q">Days a week you can realistically train</label>
+      <div class="hint">In a busy week, not a perfect one.</div>
+      <input type="number" name="days_available" min="1" max="7">
+    </div>
+    <div class="field"><label class="q">Minutes you have per session</label>
+      <div class="hint">Including warm-up. Excluding travel.</div>
+      <input type="number" name="session_length" min="10" max="180">
+    </div>
+  </div>
+  <div class="field"><label class="q">When can you train?</label>
+    <div class="pills" data-name="times">
+      <label class="pill"><input type="checkbox" value="Early morning">Early morning</label>
+      <label class="pill"><input type="checkbox" value="Mid-morning">Mid-morning</label>
+      <label class="pill"><input type="checkbox" value="Lunchtime">Lunchtime</label>
+      <label class="pill"><input type="checkbox" value="Afternoon">Afternoon</label>
+      <label class="pill"><input type="checkbox" value="Evening">Evening</label>
+      <label class="pill"><input type="checkbox" value="Weekends only">Weekends only</label>
+    </div>
+  </div>
+  <div class="field"><label class="q">Where can you train? Tick all that apply.</label>
+    <div class="pills" data-name="access">
+      <label class="pill"><input type="checkbox" value="Full commercial gym">Full commercial gym</label>
+      <label class="pill"><input type="checkbox" value="Basic/hotel gym">Basic or hotel gym</label>
+      <label class="pill"><input type="checkbox" value="Home equipment">Home, with some equipment</label>
+      <label class="pill"><input type="checkbox" value="Home, nothing">Home, nothing at all</label>
+      <label class="pill"><input type="checkbox" value="Sport-specific facility">A sport-specific gym or club</label>
+      <label class="pill"><input type="checkbox" value="Outdoors">Outdoors, park, pool</label>
+    </div>
+  </div>
+  <div class="field"><label class="q">If you ticked a sport-specific gym — which sport, and what's there?</label>
+    <input type="text" name="facility_detail" maxlength="200">
+  </div>
+  <div class="field"><label class="q">What equipment do you have at home?</label>
+    <textarea name="home_equipment" maxlength="400" placeholder="Dumbbells and what weights, bands, bench, pull-up bar, mat, nothing"></textarea>
+  </div>
+  <div class="field"><label class="q">Do you train alone?</label>
+    <div class="hint">Affects whether I program lifts that need a spotter.</div>
+    <select name="training_partner"><option value="">Select</option><option>Always alone</option><option>Sometimes with someone</option><option>Usually with a partner or coach</option></select>
+  </div>
+  <div class="field"><label class="q">Budget for equipment, if any</label>
+    <select name="equip_budget"><option value="">Select</option>
+      <option>None — work with what I have</option><option>Small</option><option>Moderate</option><option>Flexible</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">What gets in the way — work, family, travel, anything else?</label>
+    <div class="hint">Tell me if you travel often, so I build a fallback plan in from the start.</div>
+    <textarea name="constraints" maxlength="600"></textarea>
+  </div>
+</fieldset>
+
+<!-- 9 -->
+<fieldset>
+  <legend>9 — Food</legend>
+  <div class="field"><label class="q">Walk me through a typical day of eating</label>
+    <div class="hint">Rough is fine. Include drinks and snacks — those are usually where the answer is.</div>
+    <textarea name="eating_pattern" maxlength="1200"></textarea>
+  </div>
+  <div class="field"><label class="q">Allergies, intolerances, or foods you won't eat</label>
+    <textarea name="food_restrictions" maxlength="500"></textarea>
+  </div>
+  <div class="field"><label class="q">Any eating pattern tied to religion, culture or ethics?</label>
+    <div class="hint">Fasting periods, vegetarian, halal, no beef, family meals you don't control. I'll plan around them rather than against them.</div>
+    <textarea name="cultural_eating" maxlength="500"></textarea>
+  </div>
+  <div class="field"><label class="q">Who cooks, and how much time do you have?</label>
+    <select name="cooking"><option value="">Select</option>
+      <option>I cook most meals</option><option>I cook sometimes</option>
+      <option>Someone else cooks for me</option><option>Rarely cook, mostly eat out or order in</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">How often do you eat out or order food?</label>
+    <select name="eating_out"><option value="">Select</option>
+      <option>Rarely</option><option>A few times a week</option><option>Once a day</option><option>Most meals</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">Would you be willing to track what you eat?</label>
+    <select name="tracking_willingness"><option value="">Select</option>
+      <option>Already track</option><option>Willing to start</option>
+      <option>Prefer simple guidelines, no numbers</option><option>Would rather not track at all</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">Has your relationship with food or your body ever been difficult?</label>
+    <div class="hint">Past or present eating disorder, disordered eating, obsessive tracking, bingeing, or a period of extreme restriction. Asked because for some people counting calories does more harm than good, and I'd rather know now. "Prefer to discuss" is a complete answer.</div>
+    <select name="ed_screen"><option value="">Select</option>
+      <option>No</option><option>In the past</option><option>Currently something I struggle with</option><option>Prefer to discuss</option>
+    </select>
+  </div>
+  <div class="row2">
+    <div class="field"><label class="q">Heaviest adult weight (kg)</label><input type="number" step="0.1" name="highest_weight" min="30" max="300"></div>
+    <div class="field"><label class="q">Lightest adult weight (kg)</label><input type="number" step="0.1" name="lowest_weight" min="25" max="250"></div>
+  </div>
+</fieldset>
+
+<!-- 10 -->
+<fieldset>
+  <legend>10 — Measurements</legend>
+  <div class="field"><label class="q">Have you ever had a body composition scan?</label>
+    <div class="hint">A machine that estimates your body fat percentage — InBody, DEXA, or a smart scale.</div>
+    <select name="scan_access"><option value="">Select</option>
+      <option>Yes, and I can repeat it regularly</option><option>Yes, once or occasionally</option>
+      <option>Only a smart scale at home</option><option>Never had one</option>
+    </select>
+  </div>
+  <div class="row2">
+    <div class="field"><label class="q">Body fat %, if you have a number</label><input type="number" step="0.1" name="body_fat" min="3" max="70"></div>
+    <div class="field"><label class="q">Waist (cm)</label>
+      <div class="hint">Around the navel, relaxed, at the end of a normal breath out. Don't pull the tape tight.</div>
+      <input type="number" step="0.1" name="waist" min="40" max="200">
+    </div>
+  </div>
+  <div class="field"><label class="q">Have you had a genetic or DNA test done?</label>
+    <select name="dna_test" id="dnaSel"><option value="">Select</option>
+      <option>No</option>
+      <option>Yes — a fitness or wellness test</option>
+      <option>Yes — a medical or clinical test</option>
+      <option>Yes — ancestry, with health add-ons</option>
+    </select>
+  </div>
+  <div id="dnaDetail" class="hidden">
+    <div class="field"><label class="q">Would you like it taken into account?</label>
+      <select name="dna_use"><option value="">Select</option>
+        <option>Yes, please look at it</option>
+        <option>No, just noting that it exists</option>
+      </select>
+    </div>
+    <div class="row2">
+      <div class="field"><label class="q">Which company?</label><input type="text" name="dna_provider" maxlength="80"></div>
+      <div class="field"><label class="q">Roughly when?</label><input type="text" name="dna_date" maxlength="40" placeholder="e.g. 2023"></div>
+    </div>
+    <div class="field"><label class="q">Anything in it you specifically want to ask about?</label>
+      <textarea name="dna_questions" maxlength="500"></textarea>
+    </div>
+    <div class="callout">
+      <strong>Please don't paste the report here.</strong>
+      Send it separately and we'll go through it together. Two things up front so there are no surprises. First, I treat a DNA report as one input among many — your training log and how you actually respond over the next couple of months will always outrank what the paper predicts, and where they disagree, I go with your body. Second, I don't interpret the medical parts: disease risk, carrier status, anything with implications for your family. Those go to a doctor or a genetic counsellor, not to me.
+    </div>
+    <label class="agree" style="font-size:0.88rem;">
+      <input type="checkbox" name="dna_consent" value="Acknowledged"> That's understood.
+    </label>
+  </div>
+  <div class="field"><label class="q">Any recent blood work?</label>
+    <select name="bloods"><option value="">Select</option>
+      <option>No</option><option>Yes, within 6 months</option><option>Yes, over a year ago</option>
+    </select>
+  </div>
+</fieldset>
+
+<!-- 11 -->
+<fieldset>
+  <legend>11 — What you actually enjoy</legend>
+  <p class="lede">A program you like beats a better program you quit.</p>
+  <div class="field"><label class="q">Training you enjoy, or would like to try</label>
+    <textarea name="likes" maxlength="500"></textarea>
+  </div>
+  <div class="field"><label class="q">Training you hate, and won't keep doing</label>
+    <div class="hint">Say it plainly. I'd rather know than write you a plan you'll abandon in week three.</div>
+    <textarea name="dislikes" maxlength="500"></textarea>
+  </div>
+  <div class="field"><label class="q">Anything else I should know?</label>
+    <textarea name="notes" maxlength="900"></textarea>
+  </div>
+</fieldset>
+
+<div class="actions">
+  <button type="button" class="primary" id="genBtn">Generate my summary</button>
+  <button type="button" class="ghost" id="clearBtn">Clear form</button>
+</div>
+<div class="saved" id="savedNote"></div>
+<div class="err" id="errNote"></div>
+
+</form>
+
+<div id="output">
+  <h3>Your summary</h3>
+  <p class="sub">Copy this and send it to your coach, or download it as a file.</p>
+  <div id="summaryBox"></div>
+  <div class="actions">
+    <button type="button" class="ghost" id="copyBtn">Copy to clipboard</button>
+    <button type="button" class="ghost" id="dlBtn">Download as .txt</button>
+  </div>
+  <div class="err" id="copyErr"></div>
+</div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var form = document.getElementById('intakeForm');
+  var KEY = 'intake_v2';
+
+  /* ---------- accessible pill groups ---------- */
+  document.querySelectorAll('.pills').forEach(function(group){
+    var single = group.dataset.single === '1';
+    group.querySelectorAll('.pill').forEach(function(pill){
+      var input = pill.querySelector('input');
+      input.addEventListener('change', function(){
+        if(single && input.checked){
+          group.querySelectorAll('input').forEach(function(o){
+            if(o !== input){ o.checked = false; o.closest('.pill').classList.remove('on'); }
+          });
+        }
+        // "none of these" is mutually exclusive with everything else
+        if(pill.dataset.none === '1' && input.checked){
+          group.querySelectorAll('.pill').forEach(function(o){
+            if(o !== pill){ o.querySelector('input').checked = false; o.classList.remove('on'); }
+          });
+        } else if(input.checked){
+          var none = group.querySelector('.pill[data-none="1"]');
+          if(none){ none.querySelector('input').checked = false; none.classList.remove('on'); }
+        }
+        pill.classList.toggle('on', input.checked);
+        afterChange();
+      });
+    });
+  });
+
+  function checked(name){
+    return Array.prototype.map.call(
+      document.querySelectorAll('[data-name="'+name+'"] input:checked'), function(i){ return i.value; }
+    );
+  }
+
+  /* ---------- conditional sections ---------- */
+  function conditionals(){
+    var sex = document.getElementById('sexSel').value;
+    document.getElementById('femaleSection').classList.toggle('hidden', sex !== 'Female');
+
+    var c = document.getElementById('clearanceSel').value;
+    document.getElementById('clearanceDetail').classList.toggle('hidden', c.indexOf('Yes') !== 0);
+
+    document.getElementById('eventDetail').classList.toggle(
+      'hidden', document.getElementById('timelineSel').value !== 'A specific event');
+
+    var dna = document.getElementById('dnaSel').value;
+    document.getElementById('dnaDetail').classList.toggle('hidden', dna.indexOf('Yes') !== 0);
+
+    var flags = checked('red_flags').filter(function(v){ return v !== 'None of these'; });
+    document.getElementById('flagBox').classList.toggle('hidden', flags.length === 0);
+  }
+
+  /* ---------- progress rail ---------- */
+  function progress(){
+    var total = 0, done = 0;
+    form.querySelectorAll('input[type=text],input[type=number],select,textarea').forEach(function(el){
+      if(el.closest('.hidden')) return;
+      total++; if(el.value.trim() !== '') done++;
+    });
+    document.querySelectorAll('.pills').forEach(function(g){
+      if(g.closest('.hidden')) return;
+      total++; if(g.querySelector('input:checked')) done++;
+    });
+    var pct = total ? Math.round(done/total*100) : 0;
+    document.getElementById('railFill').style.width = pct + '%';
+    document.getElementById('railPct').textContent = pct + '%';
+    document.getElementById('railText').textContent =
+      pct === 0 ? 'Not started' : (pct === 100 ? 'All done' : (total - done) + ' left to fill');
+  }
+
+  /* ---------- autosave (degrades silently if storage is blocked) ---------- */
+  function save(){
+    try{
+      var d = {};
+      form.querySelectorAll('input[type=text],input[type=number],select,textarea').forEach(function(el){
+        if(el.name) d[el.name] = el.value;
+      });
+      form.querySelectorAll('input[type=checkbox][name]').forEach(function(el){ d['#'+el.name] = el.checked; });
+      document.querySelectorAll('.pills').forEach(function(g){ d['@'+g.dataset.name] = checked(g.dataset.name); });
+      d['@consent'] = document.getElementById('consent').checked;
+      localStorage.setItem(KEY, JSON.stringify(d));
+      var n = document.getElementById('savedNote');
+      n.textContent = 'Saved on this device — you can close this and come back.';
+    }catch(e){ /* private mode or file restrictions: no autosave, form still works */ }
+  }
+
+  function restore(){
+    try{
+      var raw = localStorage.getItem(KEY); if(!raw) return;
+      var d = JSON.parse(raw);
+      Object.keys(d).forEach(function(k){
+        if(k.charAt(0) === '#'){
+          var cb = form.querySelector('input[type=checkbox][name="'+k.slice(1)+'"]');
+          if(cb) cb.checked = !!d[k];
+        } else if(k.charAt(0) === '@'){
+          if(k === '@consent'){ document.getElementById('consent').checked = !!d[k]; return; }
+          var g = document.querySelector('[data-name="'+k.slice(1)+'"]'); if(!g) return;
+          g.querySelectorAll('.pill').forEach(function(p){
+            var i = p.querySelector('input');
+            i.checked = d[k].indexOf(i.value) !== -1;
+            p.classList.toggle('on', i.checked);
+          });
+        } else if(form.elements[k]) { form.elements[k].value = d[k]; }
+      });
+    }catch(e){}
+  }
+
+  var t;
+  function afterChange(){ conditionals(); progress(); clearTimeout(t); t = setTimeout(save, 400); }
+  form.addEventListener('input', afterChange);
+  form.addEventListener('change', afterChange);
+  document.getElementById('consent').addEventListener('change', afterChange);
+
+  /* ---------- summary ---------- */
+  var LABELS = {
+    name:'Name', age:'Age', sex:'Sex at birth', height:'Height (cm)', weight:'Weight (kg)',
+    contact:'Contact', occupation:'Work activity', steps:'Daily steps',
+    red_flags:'RED FLAGS', conditions:'Diagnosed conditions', other_conditions:'Other conditions',
+    meds:'Medicines & supplements',
+    pregnancy:'Pregnancy/post-partum', postpartum_detail:'Post-partum detail', cycle:'Cycle status', cycle_notes:'Cycle & training',
+    past_injuries:'Past injuries/surgeries', pain_areas:'Current pain areas', pain_detail:'Pain detail',
+    movement_limits:'Movement limitations', movement_other:'Other limitations',
+    clearance:'Clearance status', clearance_detail:'Cleared for what', rehab:'Current rehab',
+    primary_goal:'PRIMARY GOAL', secondary_goals:'Secondary goals', target_sport:'Sport',
+    goal_why:'Why it matters', timeline:'Timeline', event_detail:'Event',
+    recent_freq:'Actual days/wk last 3 months', experience:'Lifetime experience', known_lifts:'Familiar movements',
+    sport_background:'Sport background', current_program:'Current program',
+    past_attempts:'What stopped working', what_worked:'What worked before',
+    walk30:'Walk 30 min', jog10:'Jog 10 min', stairs:'Two flights of stairs', rhr:'Resting HR', hr_device:'HR device',
+    sleep_hours:'Sleep hours', sleep_quality:'Sleep quality', shift:'Shift work', stress:'Stress 1-5',
+    alcohol:'Alcohol', caffeine:'Caffeine', smoking:'Smoking',
+    days_available:'Days available', session_length:'Session minutes', times:'Training times',
+    access:'Training locations', facility_detail:'Facility detail', home_equipment:'Home equipment',
+    training_partner:'Trains alone?', equip_budget:'Equipment budget', constraints:'Constraints',
+    eating_pattern:'Typical day of eating', food_restrictions:'Allergies/restrictions',
+    cultural_eating:'Cultural/religious eating', cooking:'Cooking', eating_out:'Eating out',
+    tracking_willingness:'Tracking willingness', ed_screen:'Food relationship screen',
+    highest_weight:'Highest adult weight', lowest_weight:'Lowest adult weight',
+    scan_access:'Scan access', body_fat:'Body fat %', waist:'Waist (cm)', bloods:'Blood work',
+    dna_test:'DNA test', dna_use:'Wants DNA considered', dna_provider:'DNA provider',
+    dna_date:'DNA test date', dna_questions:'DNA questions', dna_consent:'DNA scope acknowledged',
+    likes:'Enjoys', dislikes:'Dislikes', notes:'Additional notes'
+  };
+
+  var SECTIONS = [
+    ['ABOUT', ['name','age','sex','height','weight','contact','occupation','steps']],
+    ['HEALTH SCREEN', ['*red_flags','*conditions','other_conditions','meds']],
+    ['FEMALE-SPECIFIC', ['pregnancy','postpartum_detail','cycle','cycle_notes']],
+    ['INJURIES & LIMITATIONS', ['past_injuries','*pain_areas','pain_detail','*movement_limits','movement_other','clearance','clearance_detail','rehab']],
+    ['GOALS', ['*primary_goal','*secondary_goals','target_sport','goal_why','timeline','event_detail']],
+    ['HISTORY', ['recent_freq','experience','*known_lifts','sport_background','current_program','past_attempts','what_worked']],
+    ['CURRENT FITNESS', ['walk30','jog10','stairs','rhr','hr_device']],
+    ['RECOVERY & LOAD', ['sleep_hours','sleep_quality','shift','stress','alcohol','caffeine','smoking']],
+    ['SCHEDULE & EQUIPMENT', ['days_available','session_length','*times','*access','facility_detail','home_equipment','training_partner','equip_budget','constraints']],
+    ['FOOD', ['eating_pattern','food_restrictions','cultural_eating','cooking','eating_out','tracking_willingness','ed_screen','highest_weight','lowest_weight']],
+    ['MEASUREMENTS', ['scan_access','body_fat','waist','bloods','dna_test','dna_use','dna_provider','dna_date','dna_questions','dna_consent']],
+    ['PREFERENCES', ['likes','dislikes','notes']]
+  ];
+
+  function build(){
+    var L = [];
+    var flags = checked('red_flags').filter(function(v){ return v !== 'None of these'; });
+    var clr = form.elements.clearance.value;
+
+    L.push('=== TRAINING & NUTRITION INTAKE ===');
+    L.push('Completed: ' + new Date().toLocaleString());
+    L.push('');
+    if(flags.length){
+      L.push('!! MEDICAL FLAGS RAISED — REVIEW BEFORE PROGRAMMING !!');
+      flags.forEach(function(f){ L.push('   - ' + f); });
+      L.push('');
+    }
+    if(clr === 'Yes — cleared, but with specific restrictions' || clr === 'Yes — still in treatment or rehab'){
+      L.push('!! ACTIVE RESTRICTIONS — request physio protocol / operative note before writing program.');
+      L.push('');
+    }
+    if(form.elements.ed_screen.value === 'Currently something I struggle with' ||
+       form.elements.ed_screen.value === 'In the past'){
+      L.push('!! Do not prescribe calorie tracking without discussing first.');
+      L.push('');
+    }
+
+    SECTIONS.forEach(function(sec){
+      var name = sec[0], fields = sec[1];
+      if(name === 'FEMALE-SPECIFIC' && document.getElementById('sexSel').value !== 'Female') return;
+      var body = [];
+      fields.forEach(function(f){
+        if(f.charAt(0) === '*'){
+          var k = f.slice(1), v = checked(k);
+          if(v.length) body.push('  ' + (LABELS[k]||k) + ': ' + v.join(', '));
+        } else {
+          var el = form.elements[f];
+          if(!el) return;
+          if(el.type === 'checkbox'){
+            if(el.checked) body.push('  ' + (LABELS[f]||f) + ': yes');
+          } else if(el.value.trim()){
+            body.push('  ' + (LABELS[f]||f) + ': ' + el.value.trim());
+          }
+        }
+      });
+      if(body.length){ L.push('-- ' + name + ' --'); L.push.apply(L, body); L.push(''); }
+    });
+    return L.join('\n');
+  }
+
+  /* ---------- validation ---------- */
+  var REQUIRED_TEXT = ['name','age','sex','height','weight','meds','past_injuries','clearance'];
+  var REQUIRED_GROUPS = ['red_flags','conditions','pain_areas','movement_limits','primary_goal'];
+
+  document.getElementById('genBtn').addEventListener('click', function(){
+    var missing = [];
+    if(!document.getElementById('consent').checked) missing.push('the agreement at the top');
+    REQUIRED_TEXT.forEach(function(f){
+      var el = form.elements[f];
+      if(el && !el.value.trim()) missing.push(LABELS[f] || f);
+    });
+    REQUIRED_GROUPS.forEach(function(g){
+      if(!checked(g).length) missing.push(LABELS[g] || g);
+    });
+
+    var err = document.getElementById('errNote');
+    if(missing.length){
+      err.textContent = 'Still needed: ' + missing.join(', ') + '.';
+      var first = form.querySelector('.req');
+      REQUIRED_TEXT.some(function(f){
+        var el = form.elements[f];
+        if(el && !el.value.trim()){ el.focus(); el.scrollIntoView({block:'center'}); return true; }
+        return false;
+      });
+      return;
+    }
+    err.textContent = '';
+    document.getElementById('summaryBox').textContent = build();
+    document.getElementById('output').style.display = 'block';
+    document.getElementById('output').scrollIntoView({behavior:'smooth'});
+  });
+
+  /* ---------- copy with fallback + download ---------- */
+  document.getElementById('copyBtn').addEventListener('click', function(){
+    var text = document.getElementById('summaryBox').textContent;
+    var btn = this, errEl = document.getElementById('copyErr');
+    errEl.textContent = '';
+    function ok(){ var o = btn.textContent; btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = o; }, 1600); }
+    function fallback(){
+      try{
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        var done = document.execCommand('copy');
+        document.body.removeChild(ta);
+        if(done){ ok(); } else { throw new Error(); }
+      }catch(e){
+        errEl.textContent = "Copying didn't work in this browser. Use Download as .txt, or select the text above and copy it manually.";
+      }
+    }
+    if(navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(text).then(ok).catch(fallback);
+    } else { fallback(); }
+  });
+
+  document.getElementById('dlBtn').addEventListener('click', function(){
+    var text = document.getElementById('summaryBox').textContent;
+    var name = (form.elements.name.value || 'intake').replace(/[^a-z0-9]/gi,'_');
+    var blob = new Blob([text], {type:'text/plain'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name + '_intake.txt';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', function(){
+    if(!confirm('Clear everything you have typed? This cannot be undone.')) return;
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    location.reload();
+  });
+
+  restore(); conditionals(); progress();
+})();
+</script>
+</body>
+</html>
