@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>トレーニング＆栄養 問診票</title>
+<style>
+  :root{
+    --ink:#12312a;
+    --ink-soft:#3d5a52;
+    --paper:#f6f7f5;
+    --card:#ffffff;
+    --line:#dcded8;
+    --accent:#12312a;
+    --accent-wash:#e6ede9;
+    --flag:#8a3d1b;
+    --flag-wash:#fbf0e8;
+    --stop:#8f2727;
+    --stop-wash:#fbeced;
+    --muted:#6d7772;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--paper); color:var(--ink);
+    margin:0; padding:0 16px 120px; line-height:1.55;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:700px;margin:0 auto;}
+
+  header.top{padding:34px 0 8px;}
+  h1{font-size:1.45rem;line-height:1.25;margin:0 0 6px;letter-spacing:-0.01em;}
+  .sub{color:var(--muted);margin:0 0 4px;font-size:0.94rem;}
+
+  /* signature element: a quiet progress rail that tells you how much is left */
+  .rail{
+    position:sticky;top:0;z-index:20;
+    background:var(--paper);
+    padding:10px 0 12px;
+    margin-bottom:18px;
+    border-bottom:1px solid var(--line);
+  }
+  .rail-track{height:3px;background:var(--line);border-radius:2px;overflow:hidden;}
+  .rail-fill{height:100%;width:0;background:var(--ink);transition:width .35s ease;}
+  .rail-label{
+    display:flex;justify-content:space-between;
+    font-size:0.75rem;color:var(--muted);margin-top:7px;
+    font-variant-numeric:tabular-nums;
+  }
+
+  fieldset{
+    border:1px solid var(--line); border-radius:12px;
+    padding:20px 20px 8px; margin:0 0 18px; background:var(--card);
+  }
+  legend{
+    font-weight:650; font-size:0.82rem; letter-spacing:0.07em; text-transform:uppercase;
+    color:var(--ink); padding:0 9px; background:var(--card);
+    border:1px solid var(--line); border-radius:99px;
+  }
+  .lede{color:var(--muted);font-size:0.87rem;margin:2px 0 18px;}
+
+  .field{margin-bottom:18px;}
+  label.q{display:block;font-weight:560;margin-bottom:7px;font-size:0.95rem;}
+  .hint{color:var(--muted);font-size:0.82rem;margin:-3px 0 7px;}
+  .req::after{content:" *";color:var(--stop);font-weight:700;}
+
+  input[type=text],input[type=number],input[type=date],select,textarea{
+    width:100%; padding:10px 11px; border:1px solid var(--line); border-radius:8px;
+    font-size:16px; font-family:inherit; background:#fff; color:var(--ink);
+  }
+  input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{
+    outline:2.5px solid var(--ink); outline-offset:2px;
+  }
+  textarea{resize:vertical;min-height:62px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  @media(max-width:560px){.row2{grid-template-columns:1fr;}}
+
+  .pills{display:flex;flex-wrap:wrap;gap:8px;}
+  .pill{
+    position:relative; border:1px solid var(--line); border-radius:99px;
+    padding:8px 15px; font-size:0.89rem; cursor:pointer; background:#fff; display:inline-block;
+  }
+  .pill input{position:absolute;opacity:0;width:1px;height:1px;margin:0;}
+  .pill.on{background:var(--accent-wash);border-color:var(--ink);font-weight:640;}
+  .pill:has(input:focus-visible){outline:2.5px solid var(--ink);outline-offset:2px;}
+  .pill.flag.on{background:var(--flag-wash);border-color:var(--flag);color:var(--flag);}
+  .stack .pill{display:block;width:100%;border-radius:9px;padding:11px 14px;}
+
+  .callout{
+    border-left:3px solid var(--flag); background:var(--flag-wash);
+    padding:13px 15px; border-radius:0 9px 9px 0; font-size:0.88rem; margin-bottom:18px;
+  }
+  .callout.stop{border-color:var(--stop);background:var(--stop-wash);}
+  .callout strong{display:block;margin-bottom:3px;}
+  .hidden{display:none;}
+
+  .consent{
+    border:1px solid var(--line);border-radius:12px;background:var(--card);
+    padding:18px 20px;margin-bottom:18px;font-size:0.88rem;
+  }
+  .consent p{margin:0 0 10px;color:var(--ink-soft);}
+  .agree{display:flex;gap:10px;align-items:flex-start;font-weight:560;color:var(--ink);}
+  .agree input{margin-top:4px;width:18px;height:18px;flex:none;}
+
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+  button{
+    font-family:inherit;font-size:0.97rem;font-weight:640;border-radius:9px;
+    padding:13px 20px;cursor:pointer;border:1px solid var(--ink);
+  }
+  .primary{background:var(--ink);color:#fff;flex:1 1 220px;}
+  .ghost{background:#fff;color:var(--ink);}
+  .saved{font-size:0.78rem;color:var(--muted);margin-top:10px;min-height:1em;}
+
+  #output{display:none;margin-top:26px;}
+  #summaryBox{
+    background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;
+    white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    font-size:0.8rem;max-height:380px;overflow:auto;
+  }
+  .err{color:var(--stop);font-size:0.85rem;margin-top:8px;}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <h1>トレーニング＆栄養 問診票</h1>
+  <p class="sub">所要時間は約10分です。入力内容はこの端末に自動保存されるので、途中でやめて後から再開できます。最後に、コーチへ送るためのまとめが作成されます。</p>
+</header>
+
+<div class="rail">
+  <div class="rail-track"><div class="rail-fill" id="railFill"></div></div>
+  <div class="rail-label"><span id="railText">Not started</span><span id="railPct">0%</span></div>
+</div>
+
+<div class="consent">
+  <p><strong>はじめる前に。</strong>私はフィットネスと栄養のコーチであり、医師ではありません。この問診票は病気の診断や治療を行うものではありません。ご回答の内容によっては、プログラムを作成する前に医師や理学療法士の許可を得ていただくようお願いする場合があります。これは通常のことで、安全にプログラムを進めるためのものです。</p>
+  <p>ご回答はプログラムの作成と調整のためだけに使用します。まとめはご希望の方法で送ってください。医療に関する内容を文章で書きたくない場合は、その欄は空欄のままにして、通話で相談したい旨をお知らせください。</p>
+  <label class="agree"><input type="checkbox" id="consent" required> 内容を理解しました。回答は私の知る限り正確です。</label>
+</div>
+
+<form id="intakeForm" novalidate>
+
+<!-- 1 -->
+<fieldset>
+  <legend>1 — あなたについて</legend>
+  <div class="field"><label class="q req">お名前</label><input type="text" name="name" maxlength="80" required></div>
+  <div class="row2">
+    <div class="field"><label class="q req">年齢</label><input type="number" name="age" min="18" max="95" required></div>
+    <div class="field"><label class="q req">出生時の性別</label>
+      <div class="hint">カロリー・回復・健康チェックの計算に使用します。</div>
+      <select name="sex" id="sexSel" required><option value="">Select</option><option value="Male">男性</option><option value="Female">女性</option><option value="Prefer to discuss">直接お話ししたい</option></select>
+    </div>
+  </div>
+  <div class="row2">
+    <div class="field"><label class="q req">身長</label>
+      <div class="hint">センチメートルで入力（例：172）</div>
+      <input type="number" name="height" min="120" max="230" required>
+    </div>
+    <div class="field"><label class="q req">体重</label>
+      <div class="hint">キログラムで入力（例：84.5）</div>
+      <input type="number" step="0.1" name="weight" min="30" max="250" required>
+    </div>
+  </div>
+  <div class="field"><label class="q">連絡しやすい方法</label><input type="text" name="contact" maxlength="80" placeholder="LINE ID、WhatsApp番号、またはメールアドレス"></div>
+  <div class="field"><label class="q">お仕事の身体的な内容は？</label>
+    <select name="occupation"><option value="">Select</option>
+      <option value="Mostly sitting">ほぼ座っている</option><option value="Mix of sitting and moving">座り仕事と動く仕事が半々</option>
+      <option value="On my feet most of the day">一日中立っている</option><option value="Physically demanding / heavy lifting">力仕事・重い物を運ぶ</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">1日おおよそ何歩歩きますか？</label>
+    <div class="hint">スマートフォンで確認できます。おおよそで構いません。</div>
+    <select name="steps"><option value="">Not sure</option>
+      <option value="Under 3,000">3,000歩未満</option><option value="3,000–6,000">3,000〜6,000歩</option><option value="6,000–10,000">6,000〜10,000歩</option><option value="Over 10,000">10,000歩以上</option>
+    </select>
+  </div>
+</fieldset>
+
+<!-- 2 -->
+<fieldset>
+  <legend>2 — 健康チェック</legend>
+  <p class="lede">この項目は、安全にプログラムを作成できるかどうかを判断するために必要です。飛ばさずにご記入ください。</p>
+
+  <div class="field"><label class="q req">次のような症状はありますか？当てはまるものすべてにチェックしてください。</label>
+    <div class="pills stack" data-name="red_flags" data-flag="1">
+      <label class="pill flag"><input type="checkbox" value="Chest pain/pressure/tightness with exertion">体を動かしたときの胸の痛み・圧迫感・締めつけ感</label>
+      <label class="pill flag"><input type="checkbox" value="Unusual breathlessness">運動量のわりに息切れがひどい</label>
+      <label class="pill flag"><input type="checkbox" value="Dizziness/fainting/palpitations">めまい、失神、動悸や不整脈</label>
+      <label class="pill flag"><input type="checkbox" value="Pain that wakes at night">夜中に目が覚めるほどの痛み</label>
+      <label class="pill flag"><input type="checkbox" value="Numbness/tingling into limb">腕や脚に走るしびれ・ピリピリ感</label>
+      <label class="pill flag"><input type="checkbox" value="Weakness or joint giving way">手足の力が入らない、関節が急に抜ける感じ</label>
+      <label class="pill flag"><input type="checkbox" value="Joint locking/catching">関節が引っかかる・動かなくなる</label>
+      <label class="pill flag"><input type="checkbox" value="Unexplained weight loss">原因不明の体重減少</label>
+      <label class="pill flag"><input type="checkbox" value="Change in bladder/bowel control">排尿・排便のコントロールの変化</label>
+      <label class="pill" data-none="1"><input type="checkbox" value="None of these">どれもない</label>
+    </div>
+  </div>
+
+  <div class="callout stop hidden" id="flagBox">
+    <strong>トレーニングを始める前に一度ご相談ください。</strong>
+    この問診票は最後まで記入して送ってください。ただし、チェックされた症状について、プログラムを作成する前に医師または理学療法士の診察を受けていただきたいと思います。運動中の胸の痛み・息切れ・失神がある場合は、次の運動の前に必ず受診してください。
+  </div>
+
+  <div class="field"><label class="q req">診断されている病気はありますか？当てはまるものすべてに。</label>
+    <div class="pills" data-name="conditions">
+      <label class="pill"><input type="checkbox" value="High blood pressure">高血圧</label>
+      <label class="pill"><input type="checkbox" value="Heart condition">心臓の病気</label>
+      <label class="pill"><input type="checkbox" value="High cholesterol">高コレステロール</label>
+      <label class="pill"><input type="checkbox" value="Type 1 diabetes">1型糖尿病</label>
+      <label class="pill"><input type="checkbox" value="Type 2 diabetes">2型糖尿病</label>
+      <label class="pill"><input type="checkbox" value="Prediabetes">糖尿病予備群</label>
+      <label class="pill"><input type="checkbox" value="Asthma/breathing">喘息・呼吸器の問題</label>
+      <label class="pill"><input type="checkbox" value="Thyroid">甲状腺の病気</label>
+      <label class="pill"><input type="checkbox" value="Kidney or liver">腎臓・肝臓の病気</label>
+      <label class="pill"><input type="checkbox" value="Autoimmune/inflammatory">自己免疫疾患・炎症性疾患</label>
+      <label class="pill"><input type="checkbox" value="Osteoporosis/low bone density">骨粗しょう症・骨密度低下</label>
+      <label class="pill"><input type="checkbox" value="Arthritis">関節炎</label>
+      <label class="pill"><input type="checkbox" value="Hernia">ヘルニア</label>
+      <label class="pill"><input type="checkbox" value="Epilepsy/seizures">てんかん・けいれん発作</label>
+      <label class="pill"><input type="checkbox" value="Mental health condition">メンタルヘルスの不調</label>
+      <label class="pill" data-none="1"><input type="checkbox" value="None">なし</label>
+    </div>
+  </div>
+  <div class="field"><label class="q">その他、現在続いている症状で伝えておきたいことはありますか？</label>
+    <textarea name="other_conditions" maxlength="600"></textarea>
+  </div>
+
+  <div class="field"><label class="q req">日常的に飲んでいる薬・サプリメント</label>
+    <div class="hint">処方薬、市販薬、プロテイン、ビタミン、漢方・ハーブ製品など。ない場合は「なし」と書いてください。これは思っている以上に重要です。薬によっては運動中の心拍の反応が変わったり、体組成計の数値に影響したりします。</div>
+    <textarea name="meds" maxlength="800" required></textarea>
+  </div>
+</fieldset>
+
+<!-- 2b: conditional -->
+<fieldset id="femaleSection" class="hidden">
+  <legend>2b — 追加の質問</legend>
+  <p class="lede">これらはトレーニングと栄養の内容に大きく影響します。通話で話したい項目は空欄で構いません。</p>
+  <div class="field"><label class="q">現在妊娠中、または出産から12か月以内ですか？</label>
+    <select name="pregnancy"><option value="">Select</option>
+      <option value="No, neither">いいえ、どちらでもない</option><option value="Pregnant">妊娠中</option>
+      <option value="Post-partum, vaginal birth">産後（経腟分娩）</option><option value="Post-partum, caesarean">産後（帝王切開）</option>
+      <option value="Prefer to discuss">直接お話ししたい</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">産後の場合 — 何か月経過していますか。また、その後に医師や理学療法士の診察を受けましたか？</label>
+    <input type="text" name="postpartum_detail" maxlength="160">
+  </div>
+  <div class="field"><label class="q">月経周期</label>
+    <select name="cycle"><option value="">Select</option>
+      <option value="Regular">規則的</option><option value="Irregular">不規則</option><option value="Absent for 3+ months">3か月以上ない</option>
+      <option value="On hormonal contraception">ホルモン避妊薬を使用中</option><option value="Perimenopausal">更年期前後</option><option value="Post-menopausal">閉経後</option>
+      <option value="Prefer to discuss">直接お話ししたい</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">月経周期による症状は運動に影響しますか？</label>
+    <div class="hint">体力、痛み、睡眠、食欲など、気づいたことがあれば。</div>
+    <textarea name="cycle_notes" maxlength="400"></textarea>
+  </div>
+</fieldset>
+
+<!-- 3 -->
+<fieldset>
+  <legend>3 — ケガと動きの制限</legend>
+
+  <div class="field"><label class="q req">過去の手術・大きなケガ</label>
+    <div class="hint">内容・時期・左右をご記入ください。正確な診断名がわかる場合は書いてください。「膝の手術」よりも「左膝、半月板縫合術、2023年3月」の方がはるかに役立ちます。ない場合は「なし」と書いてください。</div>
+    <textarea name="past_injuries" maxlength="800" required></textarea>
+  </div>
+
+  <div class="field"><label class="q req">現在痛みや不安のある部位はどこですか？</label>
+    <div class="pills" data-name="pain_areas">
+      <label class="pill"><input type="checkbox" value="Neck">首</label>
+      <label class="pill"><input type="checkbox" value="Shoulder L">左肩</label>
+      <label class="pill"><input type="checkbox" value="Shoulder R">右肩</label>
+      <label class="pill"><input type="checkbox" value="Elbow/Wrist">肘・手首</label>
+      <label class="pill"><input type="checkbox" value="Upper back">背中の上部</label>
+      <label class="pill"><input type="checkbox" value="Lower back">腰</label>
+      <label class="pill"><input type="checkbox" value="Hip L">左股関節</label>
+      <label class="pill"><input type="checkbox" value="Hip R">右股関節</label>
+      <label class="pill"><input type="checkbox" value="Knee L">左ひざ</label>
+      <label class="pill"><input type="checkbox" value="Knee R">右ひざ</label>
+      <label class="pill"><input type="checkbox" value="Ankle/Foot">足首・足</label>
+      <label class="pill" data-none="1"><input type="checkbox" value="Nothing right now">今はどこも痛くない</label>
+    </div>
+  </div>
+
+  <div class="field" id="painDetail">
+    <label class="q">チェックした部位について — 一番ひどいときの程度と、いつから続いているか</label>
+    <div class="hint">痛みを10段階で、そしていつ頃始まったか。「左ひざ、階段を下りるとき10段階中4、2月頃から」のように書いていただけると理想的です。</div>
+    <textarea name="pain_detail" maxlength="600"></textarea>
+  </div>
+
+  <div class="field"><label class="q req">次のうち、つらい・やりにくい・避けている動作はありますか？</label>
+    <div class="hint">ジムの種目ではなく日常の動作です。完全に楽ではないものすべてにチェックしてください。</div>
+    <div class="pills" data-name="movement_limits">
+      <label class="pill"><input type="checkbox" value="Squatting to a low chair">低い椅子にしゃがんで座る</label>
+      <label class="pill"><input type="checkbox" value="Getting up from the floor">床から立ち上がる</label>
+      <label class="pill"><input type="checkbox" value="Kneeling">ひざまずく</label>
+      <label class="pill"><input type="checkbox" value="Bending to pick something up">かがんで床の物を拾う</label>
+      <label class="pill"><input type="checkbox" value="Reaching overhead">頭の上に手を伸ばす</label>
+      <label class="pill"><input type="checkbox" value="Reaching behind back">背中に手を回す</label>
+      <label class="pill"><input type="checkbox" value="Twisting">上半身をひねる</label>
+      <label class="pill"><input type="checkbox" value="Lying flat on back">あおむけに寝る</label>
+      <label class="pill"><input type="checkbox" value="Going down stairs">階段を下りる</label>
+      <label class="pill"><input type="checkbox" value="Jumping/landing">ジャンプと着地</label>
+      <label class="pill"><input type="checkbox" value="Running">走る</label>
+      <label class="pill"><input type="checkbox" value="Balancing on one leg">片足で立つ</label>
+      <label class="pill"><input type="checkbox" value="Carrying something heavy">重い物を運ぶ</label>
+      <label class="pill" data-none="1"><input type="checkbox" value="All of these are fine">すべて問題なくできる</label>
+    </div>
+  </div>
+
+  <div class="field"><label class="q">リストにない、体が思うように動かない動作はありますか？</label>
+    <textarea name="movement_other" maxlength="400"></textarea>
+  </div>
+
+  <div class="field"><label class="q req">これらについて医師や理学療法士の診察を受けましたか？</label>
+    <select name="clearance" id="clearanceSel" required><option value="">Select</option>
+      <option value="Yes — cleared with no restrictions">はい — 制限なしで許可された</option>
+      <option value="Yes — cleared, but with specific restrictions">はい — 特定の制限つきで許可された</option>
+      <option value="Yes — still in treatment or rehab">はい — 現在も治療・リハビリ中</option>
+      <option value="No — haven't had it looked at">いいえ — まだ診てもらっていない</option>
+      <option value="Nothing to clear">特に問題なし</option>
+    </select>
+  </div>
+  <div id="clearanceDetail" class="hidden">
+    <div class="field"><label class="q">具体的に何を許可されましたか。またその時期は？</label>
+      <div class="hint">「ウォーキングと自転車は可」と「筋トレと競技復帰は可」ではまったく意味が違います。可能であれば言われたままの言葉で書いてください。</div>
+      <textarea name="clearance_detail" maxlength="600"></textarea>
+    </div>
+    <div class="field"><label class="q">現在リハビリの運動をしていますか？内容と頻度は？</label>
+      <div class="hint">それらの上に重ねるのではなく、組み合わせて計画するためです。</div>
+      <textarea name="rehab" maxlength="500"></textarea>
+    </div>
+    <div class="callout">
+      <strong>お願いがひとつ。</strong>リハビリの指示書、退院時の書類、手術記録などがあれば、まとめと一緒に写真を送ってください。これがあると推測せずに済み、最も役立ちます。
+    </div>
+  </div>
+</fieldset>
+
+<!-- 4 -->
+<fieldset>
+  <legend>4 — 目標</legend>
+  <div class="field"><label class="q req">今後6か月でひとつだけ達成できるとしたら、どれですか？</label>
+    <div class="hint">ひとつだけ選んでください。その他は下で追加できます。</div>
+    <div class="pills stack" data-name="primary_goal" data-single="1">
+      <label class="pill"><input type="checkbox" value="Fat loss">体脂肪を減らす</label>
+      <label class="pill"><input type="checkbox" value="Muscle gain">筋肉をつける</label>
+      <label class="pill"><input type="checkbox" value="Strength">筋力を上げる</label>
+      <label class="pill"><input type="checkbox" value="Sport performance">スポーツの成績を上げる</label>
+      <label class="pill"><input type="checkbox" value="Health/longevity">全体的な健康・長寿</label>
+      <label class="pill"><input type="checkbox" value="Return from injury">ケガから元の状態に戻る</label>
+      <label class="pill"><input type="checkbox" value="Stamina/conditioning">スタミナをつける</label>
+    </div>
+  </div>
+  <div class="field"><label class="q">次に重要なもの</label>
+    <div class="pills" data-name="secondary_goals">
+      <label class="pill"><input type="checkbox" value="Fat loss">体脂肪減少</label>
+      <label class="pill"><input type="checkbox" value="Muscle gain">筋肉</label>
+      <label class="pill"><input type="checkbox" value="Strength">筋力</label>
+      <label class="pill"><input type="checkbox" value="Sport performance">スポーツ</label>
+      <label class="pill"><input type="checkbox" value="Health/longevity">健康</label>
+      <label class="pill"><input type="checkbox" value="Return from injury">ケガの回復</label>
+      <label class="pill"><input type="checkbox" value="Stamina/conditioning">スタミナ</label>
+      <label class="pill"><input type="checkbox" value="Mobility">柔軟性・可動域</label>
+      <label class="pill"><input type="checkbox" value="Stress/mental health">ストレス・メンタルヘルス</label>
+    </div>
+  </div>
+  <div class="field"><label class="q">該当する場合、どのスポーツ・活動ですか？</label>
+    <input type="text" name="target_sport" maxlength="120" placeholder="例：ランニング、テニス、ムエタイ、クライミング、ハイキング">
+  </div>
+  <div class="field"><label class="q">なぜ今それが大切なのですか？</label>
+    <div class="hint">かっこよく書く必要はありません。正直に書いてください。7週目にこの言葉をお伝えします。</div>
+    <textarea name="goal_why" maxlength="700"></textarea>
+  </div>
+  <div class="field"><label class="q">目標の時期はありますか？</label>
+    <select name="timeline" id="timelineSel"><option value="">Select</option>
+      <option value="No deadline">期限なし</option><option value="About 3 months">約3か月</option><option value="About 6 months">約6か月</option>
+      <option value="About a year">約1年</option><option value="A specific event">特定のイベントがある</option>
+    </select>
+  </div>
+  <div class="field hidden" id="eventDetail"><label class="q">どんなイベントで、いつですか？</label>
+    <input type="text" name="event_detail" maxlength="160">
+  </div>
+</fieldset>
+
+<!-- 5 -->
+<fieldset>
+  <legend>5 — これまでの運動歴</legend>
+  <div class="field"><label class="q">この3か月間、実際に週何日運動しましたか？</label>
+    <div class="hint">予定ではなく実際の回数です。ゼロでもまったく問題ありません。その数字をもとに計画を立てます。</div>
+    <select name="recent_freq"><option value="">Select</option>
+      <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5+">5回以上</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">これまでの人生で、どれくらい継続的に運動してきましたか？</label>
+    <select name="experience"><option value="">Select</option>
+      <option value="Never really trained">ほとんど運動経験なし</option><option value="Under a year">1年未満</option><option value="1–3 years">1〜3年</option>
+      <option value="3–5 years">3〜5年</option><option value="5+ years">5年以上</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">次のうち、定期的にやったことがある、または指導を受けたことがあるものは？</label>
+    <div class="pills" data-name="known_lifts">
+      <label class="pill"><input type="checkbox" value="Squat">スクワット</label>
+      <label class="pill"><input type="checkbox" value="Deadlift">デッドリフト</label>
+      <label class="pill"><input type="checkbox" value="Bench press">ベンチプレス</label>
+      <label class="pill"><input type="checkbox" value="Overhead press">オーバーヘッドプレス</label>
+      <label class="pill"><input type="checkbox" value="Row/pull-up">ロウイング・懸垂</label>
+      <label class="pill"><input type="checkbox" value="Machines only">マシンのみ</label>
+      <label class="pill"><input type="checkbox" value="Classes">グループレッスン</label>
+      <label class="pill"><input type="checkbox" value="Running/cycling">ランニング・サイクリング</label>
+      <label class="pill" data-none="1"><input type="checkbox" value="None of these">どれもない</label>
+    </div>
+  </div>
+  <div class="field"><label class="q">スポーツ歴（あれば）</label>
+    <input type="text" name="sport_background" maxlength="200" placeholder="例：趣味のバドミントン、3年">
+  </div>
+  <div class="field"><label class="q">現在何かプログラムをやっていますか？内容は？</label>
+    <input type="text" name="current_program" maxlength="200">
+  </div>
+  <div class="field"><label class="q">過去に試したけれど続かなかったものは？また、その原因は何だと思いますか？</label>
+    <div class="hint">この問診票で最も参考になる質問です。ダイエット、プログラム、ジム、アプリなど。</div>
+    <textarea name="past_attempts" maxlength="800"></textarea>
+  </div>
+  <div class="field"><label class="q">一番長く続いた期間はどれくらいで、なぜ続いたと思いますか？</label>
+    <textarea name="what_worked" maxlength="600"></textarea>
+  </div>
+</fieldset>
+
+<!-- 6 -->
+<fieldset>
+  <legend>6 — 現在の体力</legend>
+  <p class="lede">正解・不正解はありません。最初の数週間が無理なく進むよう、出発点を決めるための質問です。</p>
+  <div class="field"><label class="q">30分休まず歩けますか？</label>
+    <select name="walk30"><option value="">Select</option>
+      <option value="Yes, easily">はい、楽にできる</option><option value="Yes, but it's an effort">はい、でもきつい</option><option value="Not comfortably">快適にはできない</option><option value="Not sure">わからない</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">10分休まず走れますか？</label>
+    <select name="jog10"><option value="">Select</option>
+      <option value="Yes, easily">はい、楽にできる</option><option value="Yes, but hard">はい、でもかなりきつい</option><option value="No">いいえ</option><option value="Can't run due to injury">ケガのため走れない</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">階段を2階分上ると息が切れますか？</label>
+    <select name="stairs"><option value="">Select</option><option value="Not at all">まったく</option><option value="A little">少し</option><option value="Quite a lot">かなり</option></select>
+  </div>
+  <div class="row2">
+    <div class="field"><label class="q">安静時心拍数（わかれば）</label>
+      <div class="hint">スマートウォッチやリングの数値。わからなければ空欄で。</div>
+      <input type="number" name="rhr" min="30" max="130">
+    </div>
+    <div class="field"><label class="q">心拍計やスマートウォッチをお持ちですか？</label>
+      <select name="hr_device"><option value="">Select</option><option value="Yes, chest strap">はい、チェストストラップ</option><option value="Yes, watch or ring">はい、時計またはリング</option><option value="No">いいえ</option></select>
+    </div>
+  </div>
+</fieldset>
+
+<!-- 7 -->
+<fieldset>
+  <legend>7 — 回復と生活の負荷</legend>
+  <p class="lede">どれくらいのトレーニング量に耐えられるかを判断します。ここを見誤ることが、良いプログラムが続かなくなる最大の原因です。</p>
+  <div class="row2">
+    <div class="field"><label class="q">平均的な睡眠時間</label>
+      <select name="sleep_hours"><option value="">Select</option>
+        <option value="Under 5">5時間未満</option><option value="5–6">5〜6時間</option><option value="6–7">6〜7時間</option><option value="7–8">7〜8時間</option><option value="Over 8">8時間以上</option>
+      </select>
+    </div>
+    <div class="field"><label class="q">睡眠の質</label>
+      <select name="sleep_quality"><option value="">Select</option>
+        <option value="Good, wake up rested">良い（すっきり起きられる）</option><option value="Broken but manageable">途切れるが何とかなる</option><option value="Poor most nights">ほとんどの夜よく眠れない</option>
+      </select>
+    </div>
+  </div>
+  <div class="field"><label class="q">シフト勤務や夜勤はありますか？</label>
+    <select name="shift"><option value="">Select</option><option value="No">いいえ</option><option value="Sometimes">ときどき</option><option value="Yes, regularly">はい、定期的に</option></select>
+  </div>
+  <div class="field"><label class="q">現在のストレスレベル（1〜5）</label>
+    <div class="hint">1は穏やか、5は限界まで張りつめている状態。</div>
+    <select name="stress"><option value="">Select</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select>
+  </div>
+  <div class="field"><label class="q">お酒</label>
+    <select name="alcohol"><option value="">Select</option>
+      <option value="None">なし</option><option value="1–3 drinks a week">週1〜3杯</option><option value="4–7 a week">週4〜7杯</option><option value="More than 7 a week">週7杯以上</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">1日のカフェイン摂取量</label>
+    <select name="caffeine"><option value="">Select</option>
+      <option value="None">なし</option><option value="1–2 cups">1〜2杯</option><option value="3–4 cups">3〜4杯</option><option value="5+ cups">5杯以上</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">喫煙・電子タバコはしますか？</label>
+    <select name="smoking"><option value="">Select</option><option value="No">いいえ</option><option value="Occasionally">ときどき</option><option value="Daily">毎日</option><option value="Recently quit">最近やめた</option></select>
+  </div>
+</fieldset>
+
+<!-- 8 -->
+<fieldset>
+  <legend>8 — スケジュールと設備</legend>
+  <div class="row2">
+    <div class="field"><label class="q">現実的に週何日運動できますか</label>
+      <div class="hint">理想的な週ではなく、忙しい週を基準に。</div>
+      <input type="number" name="days_available" min="1" max="7">
+    </div>
+    <div class="field"><label class="q">1回あたり何分使えますか</label>
+      <div class="hint">ウォームアップを含み、移動時間は除く。</div>
+      <input type="number" name="session_length" min="10" max="180">
+    </div>
+  </div>
+  <div class="field"><label class="q">いつ運動できますか？</label>
+    <div class="pills" data-name="times">
+      <label class="pill"><input type="checkbox" value="Early morning">早朝</label>
+      <label class="pill"><input type="checkbox" value="Mid-morning">午前中</label>
+      <label class="pill"><input type="checkbox" value="Lunchtime">昼休み</label>
+      <label class="pill"><input type="checkbox" value="Afternoon">午後</label>
+      <label class="pill"><input type="checkbox" value="Evening">夕方・夜</label>
+      <label class="pill"><input type="checkbox" value="Weekends only">週末のみ</label>
+    </div>
+  </div>
+  <div class="field"><label class="q">どこで運動できますか？当てはまるものすべてに。</label>
+    <div class="pills" data-name="access">
+      <label class="pill"><input type="checkbox" value="Full commercial gym">設備の整ったジム</label>
+      <label class="pill"><input type="checkbox" value="Basic/hotel gym">簡易ジム・ホテルのジム</label>
+      <label class="pill"><input type="checkbox" value="Home equipment">自宅（器具あり）</label>
+      <label class="pill"><input type="checkbox" value="Home, nothing">自宅（器具なし）</label>
+      <label class="pill"><input type="checkbox" value="Sport-specific facility">競技専門のジム・クラブ</label>
+      <label class="pill"><input type="checkbox" value="Outdoors">屋外・公園・プール</label>
+    </div>
+  </div>
+  <div class="field"><label class="q">競技専門のジムを選んだ場合 — どの競技で、どんな設備がありますか？</label>
+    <input type="text" name="facility_detail" maxlength="200">
+  </div>
+  <div class="field"><label class="q">自宅にどんな器具がありますか？</label>
+    <textarea name="home_equipment" maxlength="400" placeholder="ダンベル（重さも）、バンド、ベンチ、懸垂バー、マット、なし など"></textarea>
+  </div>
+  <div class="field"><label class="q">一人で運動しますか？</label>
+    <div class="hint">補助が必要な種目を入れるかどうかの判断に使います。</div>
+    <select name="training_partner"><option value="">Select</option><option value="Always alone">いつも一人</option><option value="Sometimes with someone">ときどき誰かと</option><option value="Usually with a partner or coach">たいていパートナーかコーチと</option></select>
+  </div>
+  <div class="field"><label class="q">器具の予算（あれば）</label>
+    <select name="equip_budget"><option value="">Select</option>
+      <option value="None — work with what I have">なし — 今あるもので</option><option value="Small">少し</option><option value="Moderate">ある程度</option><option value="Flexible">柔軟に対応できる</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">妨げになるものは？（仕事・家族・出張など）</label>
+    <div class="hint">出張や旅行が多い場合は教えてください。最初から代替プランを組み込みます。</div>
+    <textarea name="constraints" maxlength="600"></textarea>
+  </div>
+</fieldset>
+
+<!-- 9 -->
+<fieldset>
+  <legend>9 — 食事</legend>
+  <div class="field"><label class="q">普段の1日の食事を教えてください</label>
+    <div class="hint">だいたいで構いません。飲み物と間食も含めてください。答えはたいていそこにあります。</div>
+    <textarea name="eating_pattern" maxlength="1200"></textarea>
+  </div>
+  <div class="field"><label class="q">アレルギー・不耐症・食べられないもの</label>
+    <textarea name="food_restrictions" maxlength="500"></textarea>
+  </div>
+  <div class="field"><label class="q">宗教・文化・信条に関わる食習慣はありますか？</label>
+    <div class="hint">断食期間、ベジタリアン、ハラール、牛肉を食べない、自分で選べない家庭の食事など。それに逆らわず、合わせて計画します。</div>
+    <textarea name="cultural_eating" maxlength="500"></textarea>
+  </div>
+  <div class="field"><label class="q">誰が料理をしますか。また時間はどれくらいありますか？</label>
+    <select name="cooking"><option value="">Select</option>
+      <option value="I cook most meals">ほとんど自炊する</option><option value="I cook sometimes">ときどき自炊する</option>
+      <option value="Someone else cooks for me">家族などが作ってくれる</option><option value="Rarely cook, mostly eat out or order in">ほとんど自炊せず外食・出前が中心</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">外食や出前の頻度は？</label>
+    <select name="eating_out"><option value="">Select</option>
+      <option value="Rarely">めったにない</option><option value="A few times a week">週に数回</option><option value="Once a day">1日1回</option><option value="Most meals">ほとんどの食事</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">食事の記録をつけることはできますか？</label>
+    <select name="tracking_willingness"><option value="">Select</option>
+      <option value="Already track">すでに記録している</option><option value="Willing to start">始めてもよい</option>
+      <option value="Prefer simple guidelines, no numbers">数字なしの簡単な目安がよい</option><option value="Would rather not track at all">記録はしたくない</option>
+    </select>
+  </div>
+  <div class="field"><label class="q">食べることや体型との関係で悩んだ経験はありますか？</label>
+    <div class="hint">過去または現在の摂食障害、不健全な食習慣、記録への強いこだわり、過食、極端な制限の時期など。人によってはカロリー計算がかえって害になるため、事前に知っておきたい質問です。「直接お話ししたい」という回答でまったく問題ありません。</div>
+    <select name="ed_screen"><option value="">Select</option>
+      <option value="No">いいえ</option><option value="In the past">過去にあった</option><option value="Currently something I struggle with">現在悩んでいる</option><option value="Prefer to discuss">直接お話ししたい</option>
+    </select>
+  </div>
+  <div class="row2">
+    <div class="field"><label class="q">成人後の最高体重（kg）</label><input type="number" step="0.1" name="highest_weight" min="30" max="300"></div>
+    <div class="field"><label class="q">成人後の最低体重（kg）</label><input type="number" step="0.1" name="lowest_weight" min="25" max="250"></div>
+  </div>
+</fieldset>
+
+<!-- 10 -->
+<fieldset>
+  <legend>10 — 測定値</legend>
+  <div class="field"><label class="q">体組成測定を受けたことはありますか？</label>
+    <div class="hint">体脂肪率を測る機器のことです（InBody、DEXA、家庭用体組成計など）。</div>
+    <select name="scan_access"><option value="">Select</option>
+      <option value="Yes, and I can repeat it regularly">はい、定期的に測定できる</option><option value="Yes, once or occasionally">はい、一度または時々</option>
+      <option value="Only a smart scale at home">自宅の体組成計のみ</option><option value="Never had one">一度もない</option>
+    </select>
+  </div>
+  <div class="row2">
+    <div class="field"><label class="q">体脂肪率（数値がわかれば）</label><input type="number" step="0.1" name="body_fat" min="3" max="70"></div>
+    <div class="field"><label class="q">ウエスト（cm）</label>
+      <div class="hint">へその高さで、力を抜き、普通に息を吐いた状態で測ってください。メジャーは強く締めないこと。</div>
+      <input type="number" step="0.1" name="waist" min="40" max="200">
+    </div>
+  </div>
+  <div class="field"><label class="q">遺伝子検査・DNA検査を受けたことはありますか？</label>
+    <select name="dna_test" id="dnaSel"><option value="">Select</option>
+      <option value="No">いいえ</option>
+      <option value="Yes — a fitness or wellness test">はい — フィットネス・ウェルネス系の検査</option>
+      <option value="Yes — a medical or clinical test">はい — 医療・臨床的な検査</option>
+      <option value="Yes — ancestry, with health add-ons">はい — 祖先検査（健康オプション付き）</option>
+    </select>
+  </div>
+  <div id="dnaDetail" class="hidden">
+    <div class="field"><label class="q">その結果を考慮してほしいですか？</label>
+      <select name="dna_use"><option value="">Select</option>
+        <option value="Yes, please look at it">はい、参考にしてほしい</option>
+        <option value="No, just noting that it exists">いいえ、あることだけ伝えておく</option>
+      </select>
+    </div>
+    <div class="row2">
+      <div class="field"><label class="q">検査会社は？</label><input type="text" name="dna_provider" maxlength="80"></div>
+      <div class="field"><label class="q">おおよその時期は？</label><input type="text" name="dna_date" maxlength="40" placeholder="例：2023年"></div>
+    </div>
+    <div class="field"><label class="q">結果について特に聞きたいことはありますか？</label>
+      <textarea name="dna_questions" maxlength="500"></textarea>
+    </div>
+    <div class="callout">
+      <strong>レポートの内容はここに貼り付けないでください。</strong>
+      別途送っていただければ、一緒に確認します。あらかじめ2点お伝えします。1つ目、遺伝子検査は数ある情報のひとつとして扱います。実際のトレーニング記録とこの先数か月の体の反応の方が、検査結果の予測より常に優先されます。食い違いがある場合は体の反応を信じます。2つ目、医療に関する部分（疾患リスク、保因者情報、ご家族に関わる内容）は私は解釈しません。それらは医師または遺伝カウンセラーにご相談ください。
+    </div>
+    <label class="agree" style="font-size:0.88rem;">
+      <input type="checkbox" name="dna_consent" value="Acknowledged"> 了解しました。
+    </label>
+  </div>
+  <div class="field"><label class="q">最近の血液検査はありますか？</label>
+    <select name="bloods"><option value="">Select</option>
+      <option value="No">いいえ</option><option value="Yes, within 6 months">はい、6か月以内</option><option value="Yes, over a year ago">はい、1年以上前</option>
+    </select>
+  </div>
+</fieldset>
+
+<!-- 11 -->
+<fieldset>
+  <legend>11 — 好み</legend>
+  <p class="lede">続けられるプログラムは、優れていても続かないプログラムに勝ります。</p>
+  <div class="field"><label class="q">好きな運動、やってみたい運動</label>
+    <textarea name="likes" maxlength="500"></textarea>
+  </div>
+  <div class="field"><label class="q">嫌いで続けられない運動</label>
+    <div class="hint">はっきり書いてください。3週目でやめてしまう計画を作るより、先に知っておきたいのです。</div>
+    <textarea name="dislikes" maxlength="500"></textarea>
+  </div>
+  <div class="field"><label class="q">その他、伝えておきたいことはありますか？</label>
+    <textarea name="notes" maxlength="900"></textarea>
+  </div>
+</fieldset>
+
+<div class="actions">
+  <button type="button" class="primary" id="genBtn">まとめを作成する</button>
+  <button type="button" class="ghost" id="clearBtn">入力をクリア</button>
+</div>
+<div class="saved" id="savedNote"></div>
+<div class="err" id="errNote"></div>
+
+</form>
+
+<div id="output">
+  <h3>あなたのまとめ</h3>
+  <p class="sub">これをコピーしてコーチに送るか、ファイルとしてダウンロードしてください。</p>
+  <div id="summaryBox"></div>
+  <div class="actions">
+    <button type="button" class="ghost" id="copyBtn">クリップボードにコピー</button>
+    <button type="button" class="ghost" id="dlBtn">.txt でダウンロード</button>
+  </div>
+  <div class="err" id="copyErr"></div>
+</div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var form = document.getElementById('intakeForm');
+  var KEY = 'intake_v2_ja';
+
+  /* ---------- accessible pill groups ---------- */
+  document.querySelectorAll('.pills').forEach(function(group){
+    var single = group.dataset.single === '1';
+    group.querySelectorAll('.pill').forEach(function(pill){
+      var input = pill.querySelector('input');
+      input.addEventListener('change', function(){
+        if(single && input.checked){
+          group.querySelectorAll('input').forEach(function(o){
+            if(o !== input){ o.checked = false; o.closest('.pill').classList.remove('on'); }
+          });
+        }
+        // "none of these" is mutually exclusive with everything else
+        if(pill.dataset.none === '1' && input.checked){
+          group.querySelectorAll('.pill').forEach(function(o){
+            if(o !== pill){ o.querySelector('input').checked = false; o.classList.remove('on'); }
+          });
+        } else if(input.checked){
+          var none = group.querySelector('.pill[data-none="1"]');
+          if(none){ none.querySelector('input').checked = false; none.classList.remove('on'); }
+        }
+        pill.classList.toggle('on', input.checked);
+        afterChange();
+      });
+    });
+  });
+
+  function checked(name){
+    return Array.prototype.map.call(
+      document.querySelectorAll('[data-name="'+name+'"] input:checked'), function(i){ return i.value; }
+    );
+  }
+
+  /* ---------- conditional sections ---------- */
+  function conditionals(){
+    var sex = document.getElementById('sexSel').value;
+    document.getElementById('femaleSection').classList.toggle('hidden', sex !== 'Female');
+
+    var c = document.getElementById('clearanceSel').value;
+    document.getElementById('clearanceDetail').classList.toggle('hidden', c.indexOf('Yes') !== 0);
+
+    document.getElementById('eventDetail').classList.toggle(
+      'hidden', document.getElementById('timelineSel').value !== 'A specific event');
+
+    var dna = document.getElementById('dnaSel').value;
+    document.getElementById('dnaDetail').classList.toggle('hidden', dna.indexOf('Yes') !== 0);
+
+    var flags = checked('red_flags').filter(function(v){ return v !== 'None of these'; });
+    document.getElementById('flagBox').classList.toggle('hidden', flags.length === 0);
+  }
+
+  /* ---------- progress rail ---------- */
+  function progress(){
+    var total = 0, done = 0;
+    form.querySelectorAll('input[type=text],input[type=number],select,textarea').forEach(function(el){
+      if(el.closest('.hidden')) return;
+      total++; if(el.value.trim() !== '') done++;
+    });
+    document.querySelectorAll('.pills').forEach(function(g){
+      if(g.closest('.hidden')) return;
+      total++; if(g.querySelector('input:checked')) done++;
+    });
+    var pct = total ? Math.round(done/total*100) : 0;
+    document.getElementById('railFill').style.width = pct + '%';
+    document.getElementById('railPct').textContent = pct + '%';
+    document.getElementById('railText').textContent =
+      pct === 0 ? '未入力' : (pct === 100 ? 'すべて入力済み' : (total - done) + ' 項目 未入力');
+  }
+
+  /* ---------- autosave (degrades silently if storage is blocked) ---------- */
+  function save(){
+    try{
+      var d = {};
+      form.querySelectorAll('input[type=text],input[type=number],select,textarea').forEach(function(el){
+        if(el.name) d[el.name] = el.value;
+      });
+      form.querySelectorAll('input[type=checkbox][name]').forEach(function(el){ d['#'+el.name] = el.checked; });
+      document.querySelectorAll('.pills').forEach(function(g){ d['@'+g.dataset.name] = checked(g.dataset.name); });
+      d['@consent'] = document.getElementById('consent').checked;
+      localStorage.setItem(KEY, JSON.stringify(d));
+      var n = document.getElementById('savedNote');
+      n.textContent = 'この端末に保存しました。閉じても後から続けられます。';
+    }catch(e){ /* private mode or file restrictions: no autosave, form still works */ }
+  }
+
+  function restore(){
+    try{
+      var raw = localStorage.getItem(KEY); if(!raw) return;
+      var d = JSON.parse(raw);
+      Object.keys(d).forEach(function(k){
+        if(k.charAt(0) === '#'){
+          var cb = form.querySelector('input[type=checkbox][name="'+k.slice(1)+'"]');
+          if(cb) cb.checked = !!d[k];
+        } else if(k.charAt(0) === '@'){
+          if(k === '@consent'){ document.getElementById('consent').checked = !!d[k]; return; }
+          var g = document.querySelector('[data-name="'+k.slice(1)+'"]'); if(!g) return;
+          g.querySelectorAll('.pill').forEach(function(p){
+            var i = p.querySelector('input');
+            i.checked = d[k].indexOf(i.value) !== -1;
+            p.classList.toggle('on', i.checked);
+          });
+        } else if(form.elements[k]) { form.elements[k].value = d[k]; }
+      });
+    }catch(e){}
+  }
+
+  var t;
+  function afterChange(){ conditionals(); progress(); clearTimeout(t); t = setTimeout(save, 400); }
+  form.addEventListener('input', afterChange);
+  form.addEventListener('change', afterChange);
+  document.getElementById('consent').addEventListener('change', afterChange);
+
+  /* ---------- summary ---------- */
+  var LABELS = {
+    name:'Name', age:'年齢', sex:'出生時の性別', height:'身長 (cm)', weight:'体重 (kg)',
+    contact:'Contact', occupation:'Work activity', steps:'Daily steps',
+    red_flags:'RED FLAGS', conditions:'Diagnosed conditions', other_conditions:'Other conditions',
+    meds:'Medicines & supplements',
+    pregnancy:'Pregnancy/post-partum', postpartum_detail:'Post-partum detail', cycle:'Cycle status', cycle_notes:'Cycle & training',
+    past_injuries:'Past injuries/surgeries', pain_areas:'Current pain areas', pain_detail:'Pain detail',
+    movement_limits:'Movement limitations', movement_other:'Other limitations',
+    clearance:'Clearance status', clearance_detail:'Cleared for what', rehab:'Current rehab',
+    primary_goal:'PRIMARY GOAL', secondary_goals:'Secondary goals', target_sport:'Sport',
+    goal_why:'Why it matters', timeline:'Timeline', event_detail:'Event',
+    recent_freq:'Actual days/wk last 3 months', experience:'Lifetime experience', known_lifts:'Familiar movements',
+    sport_background:'Sport background', current_program:'Current program',
+    past_attempts:'What stopped working', what_worked:'What worked before',
+    walk30:'Walk 30 min', jog10:'Jog 10 min', stairs:'Two flights of stairs', rhr:'Resting HR', hr_device:'HR device',
+    sleep_hours:'Sleep hours', sleep_quality:'睡眠の質', shift:'Shift work', stress:'Stress 1-5',
+    alcohol:'お酒', caffeine:'Caffeine', smoking:'Smoking',
+    days_available:'Days available', session_length:'Session minutes', times:'Training times',
+    access:'Training locations', facility_detail:'Facility detail', home_equipment:'Home equipment',
+    training_partner:'Trains alone?', equip_budget:'Equipment budget', constraints:'Constraints',
+    eating_pattern:'Typical day of eating', food_restrictions:'Allergies/restrictions',
+    cultural_eating:'Cultural/religious eating', cooking:'Cooking', eating_out:'Eating out',
+    tracking_willingness:'Tracking willingness', ed_screen:'Food relationship screen',
+    highest_weight:'Highest adult weight', lowest_weight:'Lowest adult weight',
+    scan_access:'Scan access', body_fat:'Body fat %', waist:'ウエスト（cm）', bloods:'Blood work',
+    dna_test:'DNA test', dna_use:'Wants DNA considered', dna_provider:'DNA provider',
+    dna_date:'DNA test date', dna_questions:'DNA questions', dna_consent:'DNA scope acknowledged',
+    likes:'Enjoys', dislikes:'Dislikes', notes:'Additional notes'
+  };
+
+  var SECTIONS = [
+    ['ABOUT', ['name','age','sex','height','weight','contact','occupation','steps']],
+    ['HEALTH SCREEN', ['*red_flags','*conditions','other_conditions','meds']],
+    ['FEMALE-SPECIFIC', ['pregnancy','postpartum_detail','cycle','cycle_notes']],
+    ['INJURIES & LIMITATIONS', ['past_injuries','*pain_areas','pain_detail','*movement_limits','movement_other','clearance','clearance_detail','rehab']],
+    ['GOALS', ['*primary_goal','*secondary_goals','target_sport','goal_why','timeline','event_detail']],
+    ['HISTORY', ['recent_freq','experience','*known_lifts','sport_background','current_program','past_attempts','what_worked']],
+    ['CURRENT FITNESS', ['walk30','jog10','stairs','rhr','hr_device']],
+    ['RECOVERY & LOAD', ['sleep_hours','sleep_quality','shift','stress','alcohol','caffeine','smoking']],
+    ['SCHEDULE & EQUIPMENT', ['days_available','session_length','*times','*access','facility_detail','home_equipment','training_partner','equip_budget','constraints']],
+    ['FOOD', ['eating_pattern','food_restrictions','cultural_eating','cooking','eating_out','tracking_willingness','ed_screen','highest_weight','lowest_weight']],
+    ['MEASUREMENTS', ['scan_access','body_fat','waist','bloods','dna_test','dna_use','dna_provider','dna_date','dna_questions','dna_consent']],
+    ['PREFERENCES', ['likes','dislikes','notes']]
+  ];
+
+  function build(){
+    var L = [];
+    var flags = checked('red_flags').filter(function(v){ return v !== 'None of these'; });
+    var clr = form.elements.clearance.value;
+
+    L.push('=== TRAINING & NUTRITION INTAKE (JA form) ===');
+    L.push('Completed: ' + new Date().toLocaleString());
+    L.push('');
+    if(flags.length){
+      L.push('!! MEDICAL FLAGS RAISED — REVIEW BEFORE PROGRAMMING !!');
+      flags.forEach(function(f){ L.push('   - ' + f); });
+      L.push('');
+    }
+    if(clr === 'Yes — cleared, but with specific restrictions' || clr === 'Yes — still in treatment or rehab'){
+      L.push('!! ACTIVE RESTRICTIONS — request physio protocol / operative note before writing program.');
+      L.push('');
+    }
+    if(form.elements.ed_screen.value === 'Currently something I struggle with' ||
+       form.elements.ed_screen.value === 'In the past'){
+      L.push('!! Do not prescribe calorie tracking without discussing first.');
+      L.push('');
+    }
+
+    SECTIONS.forEach(function(sec){
+      var name = sec[0], fields = sec[1];
+      if(name === 'FEMALE-SPECIFIC' && document.getElementById('sexSel').value !== 'Female') return;
+      var body = [];
+      fields.forEach(function(f){
+        if(f.charAt(0) === '*'){
+          var k = f.slice(1), v = checked(k);
+          if(v.length) body.push('  ' + (LABELS[k]||k) + ': ' + v.join(', '));
+        } else {
+          var el = form.elements[f];
+          if(!el) return;
+          if(el.type === 'checkbox'){
+            if(el.checked) body.push('  ' + (LABELS[f]||f) + ': yes');
+          } else if(el.value.trim()){
+            body.push('  ' + (LABELS[f]||f) + ': ' + el.value.trim());
+          }
+        }
+      });
+      if(body.length){ L.push('-- ' + name + ' --'); L.push.apply(L, body); L.push(''); }
+    });
+    return L.join('\n');
+  }
+
+  /* ---------- validation ---------- */
+  var REQUIRED_TEXT = ['name','age','sex','height','weight','meds','past_injuries','clearance'];
+  var REQUIRED_GROUPS = ['red_flags','conditions','pain_areas','movement_limits','primary_goal'];
+
+  document.getElementById('genBtn').addEventListener('click', function(){
+    var missing = [];
+    if(!document.getElementById('consent').checked) missing.push('冒頭の同意チェック');
+    REQUIRED_TEXT.forEach(function(f){
+      var el = form.elements[f];
+      if(el && !el.value.trim()) missing.push(LABELS[f] || f);
+    });
+    REQUIRED_GROUPS.forEach(function(g){
+      if(!checked(g).length) missing.push(LABELS[g] || g);
+    });
+
+    var err = document.getElementById('errNote');
+    if(missing.length){
+      err.textContent = '未入力の項目があります: ' + missing.join('、') + '。';
+      var first = form.querySelector('.req');
+      REQUIRED_TEXT.some(function(f){
+        var el = form.elements[f];
+        if(el && !el.value.trim()){ el.focus(); el.scrollIntoView({block:'center'}); return true; }
+        return false;
+      });
+      return;
+    }
+    err.textContent = '';
+    document.getElementById('summaryBox').textContent = build();
+    document.getElementById('output').style.display = 'block';
+    document.getElementById('output').scrollIntoView({behavior:'smooth'});
+  });
+
+  /* ---------- copy with fallback + download ---------- */
+  document.getElementById('copyBtn').addEventListener('click', function(){
+    var text = document.getElementById('summaryBox').textContent;
+    var btn = this, errEl = document.getElementById('copyErr');
+    errEl.textContent = '';
+    function ok(){ var o = btn.textContent; btn.textContent = 'コピーしました'; setTimeout(function(){ btn.textContent = o; }, 1600); }
+    function fallback(){
+      try{
+        var ta = document.createElement('textarea');
+        ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select();
+        var done = document.execCommand('copy');
+        document.body.removeChild(ta);
+        if(done){ ok(); } else { throw new Error(); }
+      }catch(e){
+        errEl.textContent = "Copying didn't work in this browser. Use Download as .txt, or select the text above and copy it manually.";
+      }
+    }
+    if(navigator.clipboard && window.isSecureContext){
+      navigator.clipboard.writeText(text).then(ok).catch(fallback);
+    } else { fallback(); }
+  });
+
+  document.getElementById('dlBtn').addEventListener('click', function(){
+    var text = document.getElementById('summaryBox').textContent;
+    var name = (form.elements.name.value || 'intake').replace(/[^a-z0-9]/gi,'_');
+    var blob = new Blob([text], {type:'text/plain'});
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name + '_intake.txt';
+    document.body.appendChild(a); a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', function(){
+    if(!confirm('入力した内容をすべて消去しますか？元に戻せません。')) return;
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    location.reload();
+  });
+
+  restore(); conditionals(); progress();
+})();
+</script>
+</body>
+</html>
