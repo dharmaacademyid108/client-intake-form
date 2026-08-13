@@ -150,7 +150,7 @@
     <div class="field"><label class="q req">年齢</label><input type="number" name="age" min="18" max="95" required></div>
     <div class="field"><label class="q req">出生時の性別</label>
       <div class="hint">カロリー・回復・健康チェックの計算に使用します。</div>
-      <select name="sex" id="sexSel" required><option value="">Select</option><option value="Male">男性</option><option value="Female">女性</option><option value="Prefer to discuss">直接お話ししたい</option></select>
+      <select name="sex" id="sexSel" required><option value="">選択してください</option><option value="Male">男性</option><option value="Female">女性</option><option value="Prefer to discuss">直接お話ししたい</option></select>
     </div>
   </div>
   <div class="row2">
@@ -165,14 +165,14 @@
   </div>
   <div class="field"><label class="q">連絡しやすい方法</label><input type="text" name="contact" maxlength="80" placeholder="LINE ID、WhatsApp番号、またはメールアドレス"></div>
   <div class="field"><label class="q">お仕事の身体的な内容は？</label>
-    <select name="occupation"><option value="">Select</option>
+    <select name="occupation"><option value="">選択してください</option>
       <option value="Mostly sitting">ほぼ座っている</option><option value="Mix of sitting and moving">座り仕事と動く仕事が半々</option>
       <option value="On my feet most of the day">一日中立っている</option><option value="Physically demanding / heavy lifting">力仕事・重い物を運ぶ</option>
     </select>
   </div>
   <div class="field"><label class="q">1日おおよそ何歩歩きますか？</label>
     <div class="hint">スマートフォンで確認できます。おおよそで構いません。</div>
-    <select name="steps"><option value="">Not sure</option>
+    <select name="steps"><option value="">わからない</option>
       <option value="Under 3,000">3,000歩未満</option><option value="3,000–6,000">3,000〜6,000歩</option><option value="6,000–10,000">6,000〜10,000歩</option><option value="Over 10,000">10,000歩以上</option>
     </select>
   </div>
@@ -238,7 +238,7 @@
   <legend>2b — 追加の質問</legend>
   <p class="lede">これらはトレーニングと栄養の内容に大きく影響します。通話で話したい項目は空欄で構いません。</p>
   <div class="field"><label class="q">現在妊娠中、または出産から12か月以内ですか？</label>
-    <select name="pregnancy"><option value="">Select</option>
+    <select name="pregnancy"><option value="">選択してください</option>
       <option value="No, neither">いいえ、どちらでもない</option><option value="Pregnant">妊娠中</option>
       <option value="Post-partum, vaginal birth">産後（経腟分娩）</option><option value="Post-partum, caesarean">産後（帝王切開）</option>
       <option value="Prefer to discuss">直接お話ししたい</option>
@@ -248,7 +248,7 @@
     <input type="text" name="postpartum_detail" maxlength="160">
   </div>
   <div class="field"><label class="q">月経周期</label>
-    <select name="cycle"><option value="">Select</option>
+    <select name="cycle"><option value="">選択してください</option>
       <option value="Regular">規則的</option><option value="Irregular">不規則</option><option value="Absent for 3+ months">3か月以上ない</option>
       <option value="On hormonal contraception">ホルモン避妊薬を使用中</option><option value="Perimenopausal">更年期前後</option><option value="Post-menopausal">閉経後</option>
       <option value="Prefer to discuss">直接お話ししたい</option>
@@ -317,7 +317,7 @@
   </div>
 
   <div class="field"><label class="q req">これらについて医師や理学療法士の診察を受けましたか？</label>
-    <select name="clearance" id="clearanceSel" required><option value="">Select</option>
+    <select name="clearance" id="clearanceSel" required><option value="">選択してください</option>
       <option value="Yes — cleared with no restrictions">はい — 制限なしで許可された</option>
       <option value="Yes — cleared, but with specific restrictions">はい — 特定の制限つきで許可された</option>
       <option value="Yes — still in treatment or rehab">はい — 現在も治療・リハビリ中</option>
@@ -376,7 +376,7 @@
     <textarea name="goal_why" maxlength="700"></textarea>
   </div>
   <div class="field"><label class="q">目標の時期はありますか？</label>
-    <select name="timeline" id="timelineSel"><option value="">Select</option>
+    <select name="timeline" id="timelineSel"><option value="">選択してください</option>
       <option value="No deadline">期限なし</option><option value="About 3 months">約3か月</option><option value="About 6 months">約6か月</option>
       <option value="About a year">約1年</option><option value="A specific event">特定のイベントがある</option>
     </select>
@@ -391,12 +391,12 @@
   <legend>5 — これまでの運動歴</legend>
   <div class="field"><label class="q">この3か月間、実際に週何日運動しましたか？</label>
     <div class="hint">予定ではなく実際の回数です。ゼロでもまったく問題ありません。その数字をもとに計画を立てます。</div>
-    <select name="recent_freq"><option value="">Select</option>
+    <select name="recent_freq"><option value="">選択してください</option>
       <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5+">5回以上</option>
     </select>
   </div>
   <div class="field"><label class="q">これまでの人生で、どれくらい継続的に運動してきましたか？</label>
-    <select name="experience"><option value="">Select</option>
+    <select name="experience"><option value="">選択してください</option>
       <option value="Never really trained">ほとんど運動経験なし</option><option value="Under a year">1年未満</option><option value="1–3 years">1〜3年</option>
       <option value="3–5 years">3〜5年</option><option value="5+ years">5年以上</option>
     </select>
@@ -434,17 +434,17 @@
   <legend>6 — 現在の体力</legend>
   <p class="lede">正解・不正解はありません。最初の数週間が無理なく進むよう、出発点を決めるための質問です。</p>
   <div class="field"><label class="q">30分休まず歩けますか？</label>
-    <select name="walk30"><option value="">Select</option>
+    <select name="walk30"><option value="">選択してください</option>
       <option value="Yes, easily">はい、楽にできる</option><option value="Yes, but it's an effort">はい、でもきつい</option><option value="Not comfortably">快適にはできない</option><option value="Not sure">わからない</option>
     </select>
   </div>
   <div class="field"><label class="q">10分休まず走れますか？</label>
-    <select name="jog10"><option value="">Select</option>
+    <select name="jog10"><option value="">選択してください</option>
       <option value="Yes, easily">はい、楽にできる</option><option value="Yes, but hard">はい、でもかなりきつい</option><option value="No">いいえ</option><option value="Can't run due to injury">ケガのため走れない</option>
     </select>
   </div>
   <div class="field"><label class="q">階段を2階分上ると息が切れますか？</label>
-    <select name="stairs"><option value="">Select</option><option value="Not at all">まったく</option><option value="A little">少し</option><option value="Quite a lot">かなり</option></select>
+    <select name="stairs"><option value="">選択してください</option><option value="Not at all">まったく</option><option value="A little">少し</option><option value="Quite a lot">かなり</option></select>
   </div>
   <div class="row2">
     <div class="field"><label class="q">安静時心拍数（わかれば）</label>
@@ -452,7 +452,7 @@
       <input type="number" name="rhr" min="30" max="130">
     </div>
     <div class="field"><label class="q">心拍計やスマートウォッチをお持ちですか？</label>
-      <select name="hr_device"><option value="">Select</option><option value="Yes, chest strap">はい、チェストストラップ</option><option value="Yes, watch or ring">はい、時計またはリング</option><option value="No">いいえ</option></select>
+      <select name="hr_device"><option value="">選択してください</option><option value="Yes, chest strap">はい、チェストストラップ</option><option value="Yes, watch or ring">はい、時計またはリング</option><option value="No">いいえ</option></select>
     </div>
   </div>
 </fieldset>
@@ -463,35 +463,35 @@
   <p class="lede">どれくらいのトレーニング量に耐えられるかを判断します。ここを見誤ることが、良いプログラムが続かなくなる最大の原因です。</p>
   <div class="row2">
     <div class="field"><label class="q">平均的な睡眠時間</label>
-      <select name="sleep_hours"><option value="">Select</option>
+      <select name="sleep_hours"><option value="">選択してください</option>
         <option value="Under 5">5時間未満</option><option value="5–6">5〜6時間</option><option value="6–7">6〜7時間</option><option value="7–8">7〜8時間</option><option value="Over 8">8時間以上</option>
       </select>
     </div>
     <div class="field"><label class="q">睡眠の質</label>
-      <select name="sleep_quality"><option value="">Select</option>
+      <select name="sleep_quality"><option value="">選択してください</option>
         <option value="Good, wake up rested">良い（すっきり起きられる）</option><option value="Broken but manageable">途切れるが何とかなる</option><option value="Poor most nights">ほとんどの夜よく眠れない</option>
       </select>
     </div>
   </div>
   <div class="field"><label class="q">シフト勤務や夜勤はありますか？</label>
-    <select name="shift"><option value="">Select</option><option value="No">いいえ</option><option value="Sometimes">ときどき</option><option value="Yes, regularly">はい、定期的に</option></select>
+    <select name="shift"><option value="">選択してください</option><option value="No">いいえ</option><option value="Sometimes">ときどき</option><option value="Yes, regularly">はい、定期的に</option></select>
   </div>
   <div class="field"><label class="q">現在のストレスレベル（1〜5）</label>
     <div class="hint">1は穏やか、5は限界まで張りつめている状態。</div>
-    <select name="stress"><option value="">Select</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select>
+    <select name="stress"><option value="">選択してください</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select>
   </div>
   <div class="field"><label class="q">お酒</label>
-    <select name="alcohol"><option value="">Select</option>
+    <select name="alcohol"><option value="">選択してください</option>
       <option value="None">なし</option><option value="1–3 drinks a week">週1〜3杯</option><option value="4–7 a week">週4〜7杯</option><option value="More than 7 a week">週7杯以上</option>
     </select>
   </div>
   <div class="field"><label class="q">1日のカフェイン摂取量</label>
-    <select name="caffeine"><option value="">Select</option>
+    <select name="caffeine"><option value="">選択してください</option>
       <option value="None">なし</option><option value="1–2 cups">1〜2杯</option><option value="3–4 cups">3〜4杯</option><option value="5+ cups">5杯以上</option>
     </select>
   </div>
   <div class="field"><label class="q">喫煙・電子タバコはしますか？</label>
-    <select name="smoking"><option value="">Select</option><option value="No">いいえ</option><option value="Occasionally">ときどき</option><option value="Daily">毎日</option><option value="Recently quit">最近やめた</option></select>
+    <select name="smoking"><option value="">選択してください</option><option value="No">いいえ</option><option value="Occasionally">ときどき</option><option value="Daily">毎日</option><option value="Recently quit">最近やめた</option></select>
   </div>
 </fieldset>
 
@@ -536,10 +536,10 @@
   </div>
   <div class="field"><label class="q">一人で運動しますか？</label>
     <div class="hint">補助が必要な種目を入れるかどうかの判断に使います。</div>
-    <select name="training_partner"><option value="">Select</option><option value="Always alone">いつも一人</option><option value="Sometimes with someone">ときどき誰かと</option><option value="Usually with a partner or coach">たいていパートナーかコーチと</option></select>
+    <select name="training_partner"><option value="">選択してください</option><option value="Always alone">いつも一人</option><option value="Sometimes with someone">ときどき誰かと</option><option value="Usually with a partner or coach">たいていパートナーかコーチと</option></select>
   </div>
   <div class="field"><label class="q">器具の予算（あれば）</label>
-    <select name="equip_budget"><option value="">Select</option>
+    <select name="equip_budget"><option value="">選択してください</option>
       <option value="None — work with what I have">なし — 今あるもので</option><option value="Small">少し</option><option value="Moderate">ある程度</option><option value="Flexible">柔軟に対応できる</option>
     </select>
   </div>
@@ -564,25 +564,25 @@
     <textarea name="cultural_eating" maxlength="500"></textarea>
   </div>
   <div class="field"><label class="q">誰が料理をしますか。また時間はどれくらいありますか？</label>
-    <select name="cooking"><option value="">Select</option>
+    <select name="cooking"><option value="">選択してください</option>
       <option value="I cook most meals">ほとんど自炊する</option><option value="I cook sometimes">ときどき自炊する</option>
       <option value="Someone else cooks for me">家族などが作ってくれる</option><option value="Rarely cook, mostly eat out or order in">ほとんど自炊せず外食・出前が中心</option>
     </select>
   </div>
   <div class="field"><label class="q">外食や出前の頻度は？</label>
-    <select name="eating_out"><option value="">Select</option>
+    <select name="eating_out"><option value="">選択してください</option>
       <option value="Rarely">めったにない</option><option value="A few times a week">週に数回</option><option value="Once a day">1日1回</option><option value="Most meals">ほとんどの食事</option>
     </select>
   </div>
   <div class="field"><label class="q">食事の記録をつけることはできますか？</label>
-    <select name="tracking_willingness"><option value="">Select</option>
+    <select name="tracking_willingness"><option value="">選択してください</option>
       <option value="Already track">すでに記録している</option><option value="Willing to start">始めてもよい</option>
       <option value="Prefer simple guidelines, no numbers">数字なしの簡単な目安がよい</option><option value="Would rather not track at all">記録はしたくない</option>
     </select>
   </div>
   <div class="field"><label class="q">食べることや体型との関係で悩んだ経験はありますか？</label>
     <div class="hint">過去または現在の摂食障害、不健全な食習慣、記録への強いこだわり、過食、極端な制限の時期など。人によってはカロリー計算がかえって害になるため、事前に知っておきたい質問です。「直接お話ししたい」という回答でまったく問題ありません。</div>
-    <select name="ed_screen"><option value="">Select</option>
+    <select name="ed_screen"><option value="">選択してください</option>
       <option value="No">いいえ</option><option value="In the past">過去にあった</option><option value="Currently something I struggle with">現在悩んでいる</option><option value="Prefer to discuss">直接お話ししたい</option>
     </select>
   </div>
@@ -597,7 +597,7 @@
   <legend>10 — 測定値</legend>
   <div class="field"><label class="q">体組成測定を受けたことはありますか？</label>
     <div class="hint">体脂肪率を測る機器のことです（InBody、DEXA、家庭用体組成計など）。</div>
-    <select name="scan_access"><option value="">Select</option>
+    <select name="scan_access"><option value="">選択してください</option>
       <option value="Yes, and I can repeat it regularly">はい、定期的に測定できる</option><option value="Yes, once or occasionally">はい、一度または時々</option>
       <option value="Only a smart scale at home">自宅の体組成計のみ</option><option value="Never had one">一度もない</option>
     </select>
@@ -610,7 +610,7 @@
     </div>
   </div>
   <div class="field"><label class="q">遺伝子検査・DNA検査を受けたことはありますか？</label>
-    <select name="dna_test" id="dnaSel"><option value="">Select</option>
+    <select name="dna_test" id="dnaSel"><option value="">選択してください</option>
       <option value="No">いいえ</option>
       <option value="Yes — a fitness or wellness test">はい — フィットネス・ウェルネス系の検査</option>
       <option value="Yes — a medical or clinical test">はい — 医療・臨床的な検査</option>
@@ -619,7 +619,7 @@
   </div>
   <div id="dnaDetail" class="hidden">
     <div class="field"><label class="q">その結果を考慮してほしいですか？</label>
-      <select name="dna_use"><option value="">Select</option>
+      <select name="dna_use"><option value="">選択してください</option>
         <option value="Yes, please look at it">はい、参考にしてほしい</option>
         <option value="No, just noting that it exists">いいえ、あることだけ伝えておく</option>
       </select>
@@ -640,7 +640,7 @@
     </label>
   </div>
   <div class="field"><label class="q">最近の血液検査はありますか？</label>
-    <select name="bloods"><option value="">Select</option>
+    <select name="bloods"><option value="">選択してください</option>
       <option value="No">いいえ</option><option value="Yes, within 6 months">はい、6か月以内</option><option value="Yes, over a year ago">はい、1年以上前</option>
     </select>
   </div>
